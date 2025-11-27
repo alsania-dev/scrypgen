@@ -327,7 +327,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ### Core Classes
 
-#### `UniversalScriptGenerator`
+#### `UniversalScrypGenerator`
 
 Main orchestrator class that coordinates all components.
 

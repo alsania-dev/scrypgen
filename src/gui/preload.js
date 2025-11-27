@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showAbout: () => ipcRenderer.invoke("show-about"),
 
   // Event listeners
-  onScriptGenerated: (callback) => ipcRenderer.on("script-generated", callback),
+  onScrypGenerated: (callback) => ipcRenderer.on("script-generated", callback),
   onScriptSaved: (callback) => ipcRenderer.on("script-saved", callback),
 
   // Remove listeners

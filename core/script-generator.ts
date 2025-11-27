@@ -1,6 +1,6 @@
 import {
-  ScriptGenerationRequest,
-  ScriptGenerationResult,
+  ScrypGenerationRequest,
+  ScrypGenerationResult,
   ScriptMetadata,
   GeneratorConfig,
   Logger,
@@ -15,7 +15,7 @@ import { ScriptValidator
 import { IntegrationManager
 } from "./integration-manager";
 
-export class UniversalScriptGenerator {
+export class UniversalScrypGenerator {
   private nlpParser: EnhancedNLPParser;
   private templateEngine: TemplateEngine;
   private validator: ScriptValidator;
@@ -32,15 +32,15 @@ export class UniversalScriptGenerator {
     this.validator = new ScriptValidator(logger);
     this.integrationManager = new IntegrationManager(config, logger);
 
-    this.logger.info("Universal Script Generator initialized",
+    this.logger.info("ScripGen initialized",
     {
       alsaniaCompliant: config.alsaniaCompliance,
     });
   }
 
   async generateScript(
-    request: ScriptGenerationRequest
-  ): Promise<ScriptGenerationResult> {
+    request: ScrypGenerationRequest
+  ): Promise<ScrypGenerationResult> {
     try {
       this.logger.info("Starting script generation",
       {
@@ -89,7 +89,7 @@ export class UniversalScriptGenerator {
       );
 
       // Phase 7: Result Compilation
-      const result: ScriptGenerationResult = {
+      const result: ScrypGenerationResult = {
         success: validationResult.isValid,
         code: templateResult.code,
         language: targetLanguage,
@@ -138,7 +138,7 @@ export class UniversalScriptGenerator {
   }
 
   private selectLanguage(
-    request: ScriptGenerationRequest,
+    request: ScrypGenerationRequest,
     nlpAnalysis: any
   ): "python" | "bash"{
     // Explicit language selection
@@ -286,8 +286,8 @@ export class UniversalScriptGenerator {
   async generateKDEConnectScript(
     description: string,
     command: string
-  ): Promise<ScriptGenerationResult> {
-    const kdeRequest: ScriptGenerationRequest = {
+  ): Promise<ScrypGenerationResult> {
+    const kdeRequest: ScrypGenerationRequest = {
       description: `${
         description
       } - Transform command "${command}" for KDE Connect execution`,
@@ -305,8 +305,8 @@ export class UniversalScriptGenerator {
   async generateNemoAction(
     description: string,
     actionName: string
-  ): Promise<ScriptGenerationResult> {
-    const nemoRequest: ScriptGenerationRequest = {
+  ): Promise<ScrypGenerationResult> {
+    const nemoRequest: ScrypGenerationRequest = {
       description: `${
         description
       } - Create Nemo file manager action "${actionName}"`,
@@ -369,14 +369,14 @@ export class UniversalScriptGenerator {
   }
   // Batch processing for multiple scripts
   async generateBatchScripts(
-    requests: ScriptGenerationRequest[]
-  ): Promise<ScriptGenerationResult[]> {
+    requests: ScrypGenerationRequest[]
+  ): Promise<ScrypGenerationResult[]> {
     this.logger.info("Starting batch script generation",
     {
       count: requests.length,
     });
 
-    const results: ScriptGenerationResult[] = [];
+    const results: ScrypGenerationResult[] = [];
 
     for (const [index, request
     ] of requests.entries()) {

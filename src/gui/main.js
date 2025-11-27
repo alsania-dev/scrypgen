@@ -5,7 +5,7 @@ const ipcMain = electron.ipcMain;
 const dialog = electron.dialog;
 const path = require("path");
 const {
-  UniversalScriptGenerator,
+  UniversalScrypGenerator,
 } = require("../../dist/core/script-generator");
 
 let mainWindow;
@@ -58,7 +58,7 @@ function createWindow() {
       process.env.DEBUG && console.log(`🐛 ${msg}`, meta || ""),
   };
 
-  generator = new UniversalScriptGenerator(config, logger);
+  generator = new UniversalScrypGenerator(config, logger);
 
   // Open DevTools in development
   if (process.env.NODE_ENV === "development") {

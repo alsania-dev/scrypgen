@@ -1,4 +1,4 @@
-export interface ScriptGenerationRequest {
+export interface ScrypGenerationRequest {
   description: string;
   language?: "python" | "bash" | "auto";
   targetPlatform?: "linux" | "windows" | "macos" | "cross-platform";
@@ -10,7 +10,7 @@ export interface ScriptGenerationRequest {
   templateOverrides?: Record<string, any>;
 }
 
-export interface ScriptGenerationResult {
+export interface ScrypGenerationResult {
   success: boolean;
   code: string;
   language: "python" | "bash";
