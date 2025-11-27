@@ -6,7 +6,7 @@ import {
   Logger,
 } from "./types";
 import * as nlp from 'compromise';
-import { TfIdf, WordNet } from 'natural';
+import { TfIdf, PorterStemmer, LancasterStemmer, WordNet } from 'natural';
 
 export class EnhancedNLPParser {
   private pythonKeywords: Record<string, string[]> = {};
