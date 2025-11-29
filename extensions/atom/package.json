@@ -1,0 +1,59 @@
+{
+    "name": "scrypgen-atom",
+    "main": "./lib/main",
+    "version": "1.0.0",
+    "description": "Transform natural language into powerful scripts with AI precision. Alsania Protocol v1.0",
+    "keywords": [
+        "script",
+        "generation",
+        "python",
+        "bash",
+        "automation",
+        "alsania"
+    ],
+    "activationCommands": {
+        "atom-workspace": [
+            "scrypgen:generate-script",
+            "scrypgen:generate-script-from-selection"
+        ]
+    },
+    "menus": [
+        {
+            "label": "Packages",
+            "submenu": [
+                {
+                    "label": "ScrypGen",
+                    "submenu": [
+                        {
+                            "label": "Generate Script from Description",
+                            "command": "scrypgen:generate-script"
+                        },
+                        {
+                            "label": "Generate Script from Selection",
+                            "command": "scrypgen:generate-script-from-selection"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "context-menu": {
+        "atom-text-editor": [
+            {
+                "label": "Generate Script from Selection",
+                "command": "scrypgen:generate-script-from-selection"
+            }
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/alsania-dev/scrypgen"
+    },
+    "license": "MIT",
+    "engines": {
+        "atom": ">=1.0.0 <2.0.0"
+    },
+    "dependencies": {},
+    "consumedServices": {},
+    "providedServices": {}
+}

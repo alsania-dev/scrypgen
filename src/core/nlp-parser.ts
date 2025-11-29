@@ -5,21 +5,15 @@ import {
   ScriptRequirements,
   Logger,
 } from "./types";
-import * as nlp from 'compromise';
-import { TfIdf, WordNet } from 'natural';
 
 export class EnhancedNLPParser {
   private pythonKeywords: Record<string, string[]> = {};
   private bashKeywords: Record<string, string[]> = {};
   private logger: Logger;
-  private tfidf: TfIdf;
-  private wordNet: WordNet;
 
   constructor(logger: Logger) {
     this.logger = logger;
     this.initializeKeywords();
-    this.tfidf = new TfIdf();
-    this.wordNet = new WordNet();
   }
 
   private initializeKeywords(): void {
@@ -291,21 +285,19 @@ export class EnhancedNLPParser {
         description,
       });
 
-      // Use compromise.js for advanced NLP analysis
-      const doc = nlp(description);
-      
-      // Extract parts of speech and named entities
-      const nouns = doc.nouns().out('array');
-      const verbs = doc.verbs().out('array');
-      const adjectives = doc.adjectives().out('array');
-      const adverbs = doc.adverbs().out('array');
-      
-      // Extract intent and entities using compromise
-      const intent = this.extractIntentWithCompromise(description, doc, nouns, verbs);
-      const entities = this.extractEntitiesWithCompromise(description, doc);
+      // Use compromise.js for advanced NLP analysis (keeping for potential future use)
+      // const doc = nlp(description);
+      // Extract parts of speech and named entities (keeping for potential future use)
+      // const nouns = doc.nouns().out('array');
+      // const verbs = doc.verbs().out('array');
+      // const adjectives = doc.adjectives().out('array');
+      // const adverbs = doc.adverbs().out('array');
+      // Extract intent and entities
+      const intent = this.extractIntent(description);
+      const entities = this.extractEntities(description);
 
       // Determine complexity using multiple factors
-      const complexity = this.assessComplexity(description, intent, entities, doc);
+      const complexity = this.assessComplexity(description, intent, entities);
 
       // Language preference analysis
       const suggestedLanguage = this.determineBestLanguage(
@@ -321,7 +313,7 @@ export class EnhancedNLPParser {
       );
 
       // Calculate confidence score based on multiple factors
-      const confidence = this.calculateConfidenceWithCompromise(intent, entities, doc);
+      const confidence = this.calculateConfidence(intent, entities);
 
       const analysis: NLPAnalysis = {
         intent,
@@ -347,16 +339,6 @@ export class EnhancedNLPParser {
     }
   }
 
-  private preprocessText(text: string): string {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(new RegExp("[^\\w\\s.-]",
-    "g"),
-    " ") // Keep dots and hyphens for file extensions
-      .replace(/\s+/g,
-    " ");
-  }
 
   private extractIntent(text: string): Intent {
     const actions = this.extractActions(text);

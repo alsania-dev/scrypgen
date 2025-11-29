@@ -216,8 +216,7 @@ export class ScriptValidator {
             );
           }
         }
-
-        await fs.remove(tempFile);
+        // await fs.remove(tempFile); // Temporarily disabled for debugging
       }
     } catch (error) {
       this.logger.warn("Could not perform syntax validation",

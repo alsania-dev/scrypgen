@@ -1,0 +1,80 @@
+{
+    "name": "scrypgen-vscode",
+    "displayName": "ScrypGen - Script Generator",
+    "description": "Transform natural language into powerful scripts with AI precision. Alsania Protocol v1.0",
+    "version": "1.0.0",
+    "icon": "icon.png",
+    "engines": {
+        "vscode": "^1.75.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Snippets",
+        "Other"
+    ],
+    "galleryBanner": {
+        "color": "#0a0a0f",
+        "theme": "dark"
+    },
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "scrypgen.generateScript",
+                "title": "🔮 ScrypGen: Generate Script from Description",
+                "category": "ScrypGen"
+            },
+            {
+                "command": "scrypgen.generateScriptFromSelection",
+                "title": "🔮 ScrypGen: Generate Script from Selection",
+                "category": "ScrypGen"
+            }
+        ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "scrypgen.generateScript",
+                    "when": "editorTextFocus"
+                },
+                {
+                    "command": "scrypgen.generateScriptFromSelection",
+                    "when": "editorHasSelection"
+                }
+            ],
+            "editor/context": [
+                {
+                    "command": "scrypgen.generateScriptFromSelection",
+                    "when": "editorHasSelection",
+                    "group": "7_modification@1"
+                }
+            ]
+        },
+        "keybindings": [
+            {
+                "command": "scrypgen.generateScript",
+                "key": "ctrl+shift+g",
+                "mac": "cmd+shift+g",
+                "when": "editorTextFocus"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.74.0",
+        "@types/node": "16.x",
+        "eslint": "^8.28.0",
+        "typescript": "^4.9.4"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/alsania-dev/scrypgen"
+    },
+    "publisher": "alsania",
+    "license": "MIT"
+}

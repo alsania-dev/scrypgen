@@ -16,6 +16,9 @@ export interface TemplateResult {
 export class TemplateEngine {
   private templates: Map<string, Template>;
   private compiledTemplates: Map<string, HandlebarsTemplateDelegate>;
+  private templateCache: Map<string,
+  { compiled: HandlebarsTemplateDelegate, lastUsed: number
+  }>;
   private config: GeneratorConfig;
   private logger: Logger;
 
@@ -24,6 +27,7 @@ export class TemplateEngine {
     this.logger = logger;
     this.templates = new Map();
     this.compiledTemplates = new Map();
+    this.templateCache = new Map();
 
     // Config will be used for loading custom templates from templateDirectory
     void this.config; // TODO: Implement custom template loading
@@ -98,19 +102,19 @@ check_dependencies() {
 
     Handlebars.registerHelper("neonColors", () => {
       return new Handlebars.SafeString(`# Alsania Neon Color Scheme
-GREEN=$'\x1b[
+GREEN=$'\\x1b[
         0;32m'    # Neon Green
-CYAN=$'\x1b[
+CYAN=$'\\x1b[
           0;36m'     # Electric Cyan
-PURPLE=$'\x1b[
+PURPLE=$'\\x1b[
             0;35m'   # Royal Purple
-NAVY=$'\x1b[
+NAVY=$'\\x1b[
               0;34m'     # Deep Navy
-YELLOW=$'\x1b[
+YELLOW=$'\\x1b[
                 1;33m'   # Bright Yellow
-RED=$'\x1b[
+RED=$'\\x1b[
                   0;31m'      # Alert Red
-NC=$'\x1b[
+NC=$'\\x1b[
                     0m'          # No Color`);
                   });
                 }
@@ -213,12 +217,14 @@ NC=$'\x1b[
                   });
 
     // Bash Templates
+    const bashBasicContent = this.getBashBasicTemplate();
+    this.logger.debug("Registering bash_basic template with content length:", bashBasicContent.length);
     this.registerTemplate({
       name: "bash_basic",
       language: "bash",
       category: "basic",
       description: "Basic Bash script with Alsania styling",
-      content: this.getBashBasicTemplate(),
+      content: bashBasicContent,
       variables: [
                       {
           name: "description",
@@ -310,6 +316,7 @@ NC=$'\x1b[
     this.logger.info("Built-in templates loaded",
                   {
       count: this.templates.size,
+      templates: Array.from(this.templates.keys()),
       alsaniaCompliant: Array.from(this.templates.values()).every(
         (t) => t.alsaniaCompliant,
       ),
@@ -321,6 +328,11 @@ NC=$'\x1b[
     nlpAnalysis: NLPAnalysis,
     overrides: Record<string, any>,
   ): Promise<TemplateResult> {
+    this.logger.debug("processTemplate called",
+                  {
+      language,
+      intent: nlpAnalysis.intent.primary
+                  });
     try {
                     // Select appropriate template
       const template = this.selectTemplate(language, nlpAnalysis);
@@ -334,7 +346,11 @@ NC=$'\x1b[
 
       // Compile and render template
       const compiledTemplate = this.getCompiledTemplate(template);
+      this.logger.debug("Rendering template with variables:", variables);
       const code = compiledTemplate(variables);
+      this.logger.debug("Template rendered, code length:", code.length);
+      this.logger.debug("Rendered code preview:", code.substring(0,
+                    200));
 
       // Extract dependencies
       const dependencies = this.extractDependencies(template, variables);
@@ -376,6 +392,13 @@ NC=$'\x1b[
       (t) => t.language === language,
     );
 
+    this.logger.debug("Template selection",
+                  {
+      language,
+      intent: nlpAnalysis.intent.primary,
+      candidates: candidates.map(c => c.name)
+                  });
+
     // Intent-based template selection
     switch (nlpAnalysis.intent.primary) {
       case "gui_application":
@@ -409,7 +432,11 @@ NC=$'\x1b[
         );
 
       default:
-        return candidates.find((t) => t.category === "basic")!;
+        const selected = candidates.find((t) => t.category === "basic")!;
+        this.logger.debug("Selected template",
+                    { name: selected.name
+                    });
+        return selected;
                   }
                 }
 
@@ -506,11 +533,28 @@ NC=$'\x1b[
                 }
 
   private getCompiledTemplate(template: Template): HandlebarsTemplateDelegate {
-    if (!this.compiledTemplates.has(template.name)) {
+    this.logger.debug(`Compiling template: ${template.name
+                  }, content length: ${template.content.length
+                  }`);
+    this.logger.debug(`Template content preview:`, template.content.substring(0,
+                  100));
+    try {
       const compiled = Handlebars.compile(template.content);
-      this.compiledTemplates.set(template.name, compiled);
+      this.logger.debug(`Successfully compiled template: ${template.name
+                    }`);
+
+      // Test the compilation with a simple variable
+      const testResult = compiled({ test: 'working'
+                    });
+      this.logger.debug(`Test compilation result:`, testResult.substring(0,
+                    50));
+
+      return compiled;
+                  } catch (error) {
+      this.logger.error(`Failed to compile template ${template.name
+                    }:`, error);
+      throw error;
                   }
-    return this.compiledTemplates.get(template.name)!;
                 }
 
   private extractDependencies(
@@ -578,7 +622,15 @@ NC=$'\x1b[
 
   registerTemplate(template: Template): void {
     this.templates.set(template.name, template);
-    this.compiledTemplates.delete(template.name); // Force recompilation
+    // Clear both old and new caches to force recompilation
+    this.compiledTemplates.delete(template.name);
+    // Clear any cached versions with different content lengths
+    for (const key of Array.from(this.templateCache.keys())) {
+      if (key.startsWith(`${template.name
+                    }_`)) {
+        this.templateCache.delete(key);
+                    }
+                  }
     this.logger.debug("Template registered",
                   {
       name: template.name,
@@ -654,7 +706,8 @@ Generated by ScripGen
               }
 """{{#if imports
             }
-          }{
+          }
+{
             {pythonImports imports
             }
           }
@@ -680,17 +733,17 @@ def main(): """Main execution function"""
             {#if mainLogic
             }
           }
-        {
+{
             {mainLogic
             }
           }
-        {
+{
             {else
             }
           }
         # Add your main logic here
         print("Hello, World!")
-        {
+{
             {/if
             }
           }
@@ -763,18 +816,18 @@ class {
         style.configure('Alsania.TFrame', background=COLORS['bg_dark'
       ])
         style.configure('Alsania.TLabel',
-                       background=COLORS['bg_dark'
+                        background=COLORS['bg_dark'
       ],
-                       foreground=COLORS['neon_green'
+                        foreground=COLORS['neon_green'
       ],
-                       font=('Consolas',
+                        font=('Consolas',
       11))
         style.configure('Alsania.TButton',
-                       background=COLORS['bg_light'
+                        background=COLORS['bg_light'
       ],
-                       foreground=COLORS['electric_cyan'
+                        foreground=COLORS['electric_cyan'
       ],
-                       font=('Consolas',
+                        font=('Consolas',
       10, 'bold'))
 
     def create_widgets(self): """Create and layout GUI widgets"""
@@ -784,9 +837,9 @@ class {
 
         # Title
         title_label = ttk.Label(main_frame,
-                               text="🔮 {{appName}}",
-                               style='Alsania.TLabel',
-                               font=('Consolas',
+                                text="🔮 {{appName}}",
+                                style='Alsania.TLabel',
+                                font=('Consolas',
       16, 'bold'))
         title_label.pack(pady=(0,
       20))
@@ -795,7 +848,7 @@ class {
         content_frame = ttk.Frame(main_frame, style='Alsania.TFrame')
         content_frame.pack(fill=tk.BOTH, expand=True)
 
-        {
+{
         {mainLogic
         }
       }
@@ -804,8 +857,8 @@ class {
         self.status_var = tk.StringVar()
         self.status_var.set("🌟 Ready - Alsania Powered")
         status_label = ttk.Label(main_frame,
-                                textvariable=self.status_var,
-                                style='Alsania.TLabel')
+                                 textvariable=self.status_var,
+                                 style='Alsania.TLabel')
         status_label.pack(side=tk.BOTTOM, fill=tk.X, pady=(10,
       0))
 
@@ -858,7 +911,7 @@ from typing import List, Optional
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='🔮 %(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='🔮 %(asctime)s - %(name)s - %(levelname)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
@@ -891,7 +944,7 @@ class FileProcessor: """Alsania-powered file processing engine"""
         try:
             logger.info(f"📄 Processing file: {file_path}")
 
-            {
+{
     {mainLogic
     }
   }
@@ -954,7 +1007,7 @@ if __name__ == "__main__":
 }
 
   private getBashBasicTemplate(): string {
-    return `#!/usr/bin/env bash
+    const template = `#!/usr/bin/env bash
 #
 # {
     {description
@@ -967,75 +1020,16 @@ if __name__ == "__main__":
   }
 #
 
-set -e  # Exit on any error
-set -u  # Exit on undefined variables
-set -o pipefail  # Exit on pipe failures
+set -e
 
 {
-    {neonColors
+    {mainLogic
     }
   }
 
-# Logging functions with Alsania styling
-log_info() {
-    echo -e "\${GREEN}🔮 [INFO]\${NC} \$1"
-  }
-
-log_warn() {
-    echo -e "\${YELLOW}⚠️  [WARN]\${NC} \$1"
-  }
-
-log_error() {
-    echo -e "\${RED}💥 [ERROR]\${NC} \$1" >&2
-  }
-
-log_success() {
-    echo -e "\${CYAN}✨ [SUCCESS]\${NC} \$1"
-  }
-
-{
-    {#if commands
-    }
-  }
-{
-    {bashDependencies commands
-    }
-  }
-{
-    {/if
-    }
-  }
-
-cleanup() {
-    log_info "🧹 Cleaning up..."
-    # Add cleanup logic here
-  }
-
-# Set up signal handlers
-trap cleanup EXIT
-trap 'log_error "Script interrupted"; exit 1' INT TERM
-
-main() {
-    log_info "🚀 Starting script execution..."{
-      {#if commands
-      }
-    }
-    check_dependencies
-{
-      {/if
-      }
-    }
-
-{
-      {mainLogic
-      }
-    }
-
-    log_success "Script completed successfully!"
-  }
-
-# Execute main function with all arguments
-main "\$@"`;
+echo 'Script completed'`;
+    this.logger.debug("getBashBasicTemplate returning template with length:", template.length);
+    return template;
 }
 
   private getBashNemoTemplate(): string {
@@ -1055,7 +1049,8 @@ main "\$@"`;
 set -e
 
 {
-    {neonColors
+    {
+neonColors
     }
   }
 
@@ -1105,10 +1100,10 @@ stop_progress() {
 process_files() {
     local file_count=\$#
     show_message "Processing \$file_count selected file(s)..."
-    
+
     local processed=0
     local failed=0
-    
+
     for file in "\$@"; do
         if [
       [ -f "\$file"
@@ -1118,7 +1113,7 @@ process_files() {
       ]
     ]; then
             echo -e "\${CYAN}📄 Processing:\${NC} \$file"
-            
+
             if process_single_file "\$file"; then
                 ((processed++))
             else
@@ -1129,19 +1124,19 @@ process_files() {
             ((failed++))
         fi
     done
-    
+
     show_message "✅ Processing complete!\\n\\n📊 Results:\\n• Processed: \$processed\\n• Failed: \$failed"
   }
 
 process_single_file() {
     local file="\$1"
-    
+
     # Your file processing logic here
 {
       {fileLogic
       }
     }
-    
+
     return 0
   }
 
@@ -1152,10 +1147,10 @@ main() {
         show_error "No files selected.\\n\\nPlease select files in Nemo and try again."
         exit 1
     fi
-    
+
     # Trap cleanup
     trap stop_progress EXIT
-    
+
     # Process the files
     process_files "\$@"
   }
@@ -1181,7 +1176,8 @@ main "\$@"`;
 set -e
 
 {
-    {neonColors
+    {
+neonColors
     }
   }
 
@@ -1204,12 +1200,12 @@ send_notification() {
     local title="\$1"
     local message="\$2"
     local urgency="\${3:-normal}"
-    
+
     # Send local notification
     if command -v notify-send &> /dev/null; then
         notify-send -u "\$urgency" "🔮 \$title" "\$message"
     fi
-    
+
     # Send to KDE Connect device (if available)
     if command -v kdeconnect-cli &> /dev/null; then
         kdeconnect-cli --ping-msg "🔮 \$title: \$message"2>/dev/null || true
@@ -1219,7 +1215,7 @@ send_notification() {
 execute_transformed_command() {
     log_info "🚀 Executing transformed command..."
     log_info "📱 Original: \$ORIGINAL_COMMAND"
-    
+
     # Execute the transformed command
     if eval "\$TRANSFORMED_COMMAND"; then
         send_notification "Command Success""✅ Command executed successfully!""low"
@@ -1236,20 +1232,20 @@ execute_transformed_command() {
 setup_transformed_command() {
     # Transform the original command for remote execution
     TRANSFORMED_COMMAND="{{transformedLogic}}"
-    
+
     log_info "🔄 Command transformed for remote execution"
     log_info "📱 Transformed: \$TRANSFORMED_COMMAND"
   }
 
 main() {
     log_info "🌟 KDE Connect Command Transformer Started"
-    
+
     # Setup the transformed command
     setup_transformed_command
-    
+
     # Execute the command
     execute_transformed_command
-    
+
     log_info "🏁 Execution complete - log saved to \$LOG_FILE"
   }
 

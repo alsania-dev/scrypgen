@@ -53,11 +53,20 @@ export class UniversalScrypGenerator {
       const nlpAnalysis = await this.nlpParser.analyzeDescription(
         request.description
       );
+      console.log("NLP analysis completed",
+      { intent: nlpAnalysis.intent?.primary, language: nlpAnalysis.suggestedLanguage
+      });
 
       // Phase 2: Language Selection
       const targetLanguage = this.selectLanguage(request, nlpAnalysis);
+      console.log("Language selected",
+      { targetLanguage
+      });
 
       // Phase 3: Template Selection and Processing
+      console.log("About to call templateEngine.processTemplate",
+      { targetLanguage, intent: nlpAnalysis.intent.primary
+      });
       const templateResult = await this.templateEngine.processTemplate(
         targetLanguage,
         nlpAnalysis,
