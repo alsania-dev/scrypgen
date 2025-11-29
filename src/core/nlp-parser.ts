@@ -88,15 +88,7 @@ export class EnhancedNLPParser {
         "shell",
         "os",
       ],
-      network: [
-        "http",
-        "https",
-        "ftp",
-        "ssh",
-        "socket",
-        "requests",
-        "urllib"
-      ],
+      network: ["http", "https", "ftp", "ssh", "socket", "requests", "urllib"],
       math_science: [
         "calculate",
         "compute",
@@ -133,22 +125,8 @@ export class EnhancedNLPParser {
         "decode",
         "stream",
       ],
-      testing: [
-        "unittest",
-        "pytest",
-        "test",
-        "assert",
-        "mock",
-        "fixture"
-      ],
-      logging: [
-        "log",
-        "debug",
-        "error",
-        "warning",
-        "info",
-        "trace"
-      ],
+      testing: ["unittest", "pytest", "test", "assert", "mock", "fixture"],
+      logging: ["log", "debug", "error", "warning", "info", "trace"],
     };
 
     this.bashKeywords = {
@@ -186,16 +164,7 @@ export class EnhancedNLPParser {
         "at",
         "nohup",
       ],
-      network: [
-        "curl",
-        "wget",
-        "ping",
-        "ssh",
-        "scp",
-        "rsync",
-        "netstat",
-        "ss"
-      ],
+      network: ["curl", "wget", "ping", "ssh", "scp", "rsync", "netstat", "ss"],
       archive: [
         "tar",
         "zip",
@@ -205,25 +174,8 @@ export class EnhancedNLPParser {
         "compress",
         "uncompress",
       ],
-      monitoring: [
-        "top",
-        "htop",
-        "ps",
-        "df",
-        "du",
-        "free",
-        "iostat",
-        "vmstat"
-      ],
-      package_management: [
-        "apt",
-        "yum",
-        "dnf",
-        "pacman",
-        "pip",
-        "npm",
-        "snap"
-      ],
+      monitoring: ["top", "htop", "ps", "df", "du", "free", "iostat", "vmstat"],
+      package_management: ["apt", "yum", "dnf", "pacman", "pip", "npm", "snap"],
       git_vcs: [
         "git",
         "svn",
@@ -234,21 +186,8 @@ export class EnhancedNLPParser {
         "branch",
         "merge",
       ],
-      backup: [
-        "backup",
-        "sync",
-        "mirror",
-        "archive",
-        "restore"
-      ],
-      environment: [
-        "export",
-        "env",
-        "set",
-        "unset",
-        "source",
-        "alias"
-      ],
+      backup: ["backup", "sync", "mirror", "archive", "restore"],
+      environment: ["export", "env", "set", "unset", "source", "alias"],
       conditional: [
         "if",
         "then",
@@ -280,8 +219,7 @@ export class EnhancedNLPParser {
 
   async analyzeDescription(description: string): Promise<NLPAnalysis> {
     try {
-      this.logger.info("Analyzing natural language description",
-      {
+      this.logger.info("Analyzing natural language description", {
         description,
       });
 
@@ -300,10 +238,7 @@ export class EnhancedNLPParser {
       const complexity = this.assessComplexity(description, intent, entities);
 
       // Language preference analysis
-      const suggestedLanguage = this.determineBestLanguage(
-        description,
-        intent,
-      );
+      const suggestedLanguage = this.determineBestLanguage(description, intent);
 
       // Extract requirements
       const requirements = this.extractRequirements(
@@ -324,8 +259,7 @@ export class EnhancedNLPParser {
         requirements,
       };
 
-      this.logger.info("NLP analysis completed",
-      {
+      this.logger.info("NLP analysis completed", {
         suggestedLanguage,
         complexity,
         confidence: Math.round(confidence * 100),
@@ -334,11 +268,9 @@ export class EnhancedNLPParser {
       return analysis;
     } catch (error) {
       this.logger.error("Error during NLP analysis", error);
-      throw new Error(`NLP analysis failed: ${error
-      }`);
+      throw new Error(`NLP analysis failed: ${error}`);
     }
   }
-
 
   private extractIntent(text: string): Intent {
     const actions = this.extractActions(text);
@@ -360,41 +292,25 @@ export class EnhancedNLPParser {
       primary = "kde_connect";
     } else if (
       actions.some((action) =>
-        [
-      "scrape",
-      "download",
-      "api",
-      "http"
-    ].includes(action),
+        ["scrape", "download", "api", "http"].includes(action),
       )
     ) {
       primary = "web_automation";
     } else if (
-      actions.some((action) => [
-      "backup",
-      "sync",
-      "archive"
-    ].includes(action))
+      actions.some((action) => ["backup", "sync", "archive"].includes(action))
     ) {
       primary = "system_administration";
     } else if (
-      actions.some((action) => [
-      "gui",
-      "window",
-      "interface"
-    ].includes(action)) ||
+      actions.some((action) =>
+        ["gui", "window", "interface"].includes(action),
+      ) ||
       text.includes("tkinter") ||
       text.includes("gui")
     ) {
       primary = "gui_application";
     } else if (
       actions.some((action) =>
-        [
-      "read",
-      "write",
-      "process",
-      "parse"
-    ].includes(action),
+        ["read", "write", "process", "parse"].includes(action),
       )
     ) {
       primary = "file_processing";
@@ -477,67 +393,52 @@ export class EnhancedNLPParser {
     const entities: Entity[] = [];
 
     // File patterns
-    const filePattern = new RegExp("\\b[\\w*.-]+\\.(txt|csv|json|xml|pdf|doc|xls|py|sh|js|html|css|log)\\b",
-    "g");
+    const filePattern = new RegExp(
+      "\\b[\\w*.-]+\\.(txt|csv|json|xml|pdf|doc|xls|py|sh|js|html|css|log)\\b",
+      "g",
+    );
     let match;
 
     while ((match = filePattern.exec(text)) !== null) {
       entities.push({
-        text: match[
-          0
-        ],
+        text: match[0],
         label: "FILE",
         start: match.index,
-        end: match.index + match[
-          0
-        ].length,
+        end: match.index + match[0].length,
         confidence: 0.9,
       });
     }
     // URL patterns
-    const urlPattern = new RegExp("https?://[^\\s]+",
-    "g");
+    const urlPattern = new RegExp("https?://[^\\s]+", "g");
     while ((match = urlPattern.exec(text)) !== null) {
       entities.push({
-        text: match[
-          0
-        ],
+        text: match[0],
         label: "URL",
         start: match.index,
-        end: match.index + match[
-          0
-        ].length,
+        end: match.index + match[0].length,
         confidence: 0.95,
       });
     }
     // Command patterns
-    const commandPattern = /\b(ls|cp|mv|rm|mkdir|chmod|grep|sed|awk|curl|wget)\b/g;
+    const commandPattern =
+      /\b(ls|cp|mv|rm|mkdir|chmod|grep|sed|awk|curl|wget)\b/g;
     while ((match = commandPattern.exec(text)) !== null) {
       entities.push({
-        text: match[
-          0
-        ],
+        text: match[0],
         label: "COMMAND",
         start: match.index,
-        end: match.index + match[
-          0
-        ].length,
+        end: match.index + match[0].length,
         confidence: 0.85,
       });
     }
     // Path patterns
-    const pathPattern = new RegExp("(?:/[^\\s]*|~/[^\\s]*|\\./[^\\s]*)",
-    "g");
+    const pathPattern = new RegExp("(?:/[^\\s]*|~/[^\\s]*|\\./[^\\s]*)", "g");
     while ((match = pathPattern.exec(text)) !== null) {
       entities.push({
-        text: match[
-          0
-        ],
+        text: match[0],
         label: "PATH",
         start: match.index,
-        end: match.index + match[
-          0
-        ].length,
+        end: match.index + match[0].length,
         confidence: 0.8,
       });
     }
@@ -549,17 +450,11 @@ export class EnhancedNLPParser {
     text: string,
     intent: Intent,
     entities: Entity[],
-  ): "simple" | "medium" | "complex"{
+  ): "simple" | "medium" | "complex" {
     let complexityScore = 0;
 
     // Base complexity indicators
-    const simpleIndicators = [
-      "hello",
-      "basic",
-      "simple",
-      "print",
-      "echo"
-    ];
+    const simpleIndicators = ["hello", "basic", "simple", "print", "echo"];
     const mediumIndicators = [
       "function",
       "class",
@@ -627,27 +522,23 @@ export class EnhancedNLPParser {
   private determineBestLanguage(
     text: string,
     intent: Intent,
-  ): "python" | "bash"{
+  ): "python" | "bash" {
     let pythonScore = 0;
     let bashScore = 0;
 
     // Check against keyword databases
-    Object.entries(this.pythonKeywords).forEach(([category, keywords
-    ]) => {
+    Object.entries(this.pythonKeywords).forEach(([category, keywords]) => {
       keywords.forEach((keyword) => {
         if (text.includes(keyword)) {
-          pythonScore += this.getCategoryWeight(category,
-          "python");
+          pythonScore += this.getCategoryWeight(category, "python");
         }
       });
     });
 
-    Object.entries(this.bashKeywords).forEach(([category, keywords
-    ]) => {
+    Object.entries(this.bashKeywords).forEach(([category, keywords]) => {
       keywords.forEach((keyword) => {
         if (text.includes(keyword)) {
-          bashScore += this.getCategoryWeight(category,
-          "bash");
+          bashScore += this.getCategoryWeight(category, "bash");
         }
       });
     });
@@ -665,15 +556,15 @@ export class EnhancedNLPParser {
         pythonScore += 3;
         break;
       case "file_processing":
-      // Both are good, slight preference to Python for complex processing
+        // Both are good, slight preference to Python for complex processing
         if (
           intent.actions.includes("parse") ||
           intent.actions.includes("analyze")
         ) {
           pythonScore += 1;
-      } else {
+        } else {
           bashScore += 1;
-      }
+        }
         break;
     }
     // File type hints
@@ -681,11 +572,9 @@ export class EnhancedNLPParser {
     if (text.includes(".sh") || text.includes("bash") || text.includes("shell"))
       bashScore += 2;
 
-    this.logger.debug("Language scoring",
-    { pythonScore, bashScore
-    });
+    this.logger.debug("Language scoring", { pythonScore, bashScore });
 
-    return pythonScore >= bashScore ? "python": "bash";
+    return pythonScore >= bashScore ? "python" : "bash";
   }
 
   private getCategoryWeight(
@@ -726,9 +615,7 @@ export class EnhancedNLPParser {
       },
     };
 
-    return weights[language
-    ]?.[category
-    ] || 1;
+    return weights[language]?.[category] || 1;
   }
 
   private extractRequirements(
@@ -773,44 +660,22 @@ export class EnhancedNLPParser {
     // Detect system access needs
     requirements.networkAccess =
       intent.actions.some((action) =>
-        [
-      "download",
-      "upload",
-      "request",
-      "fetch",
-      "scrape",
-      "ping"
-    ].includes(
+        ["download", "upload", "request", "fetch", "scrape", "ping"].includes(
           action,
         ),
       ) || entities.some((entity) => entity.label === "URL");
 
     requirements.fileSystemAccess =
       intent.actions.some((action) =>
-        [
-      "read",
-      "write",
-      "create",
-      "delete",
-      "copy",
-      "move",
-      "find"
-    ].includes(
+        ["read", "write", "create", "delete", "copy", "move", "find"].includes(
           action,
         ),
-      ) || entities.some((entity) => [
-      "FILE",
-      "PATH"
-    ].includes(entity.label));
+      ) || entities.some((entity) => ["FILE", "PATH"].includes(entity.label));
 
     requirements.guiRequired =
       intent.primary === "gui_application" ||
       intent.actions.some((action) =>
-        [
-      "show",
-      "display",
-      "window"
-    ].includes(action),
+        ["show", "display", "window"].includes(action),
       );
 
     requirements.webRequired =
@@ -818,12 +683,7 @@ export class EnhancedNLPParser {
 
     requirements.databaseRequired =
       intent.actions.some((action) =>
-        [
-      "query",
-      "insert",
-      "update",
-      "delete"
-    ].includes(action),
+        ["query", "insert", "update", "delete"].includes(action),
       ) ||
       text.includes("database") ||
       text.includes("sql");
@@ -836,62 +696,18 @@ export class EnhancedNLPParser {
 
     // Extract potential libraries based on content
     const libraryHints: Record<string, string[]> = {
-      requests: [
-        "api",
-        "http",
-        "web",
-        "download"
-      ],
-      pandas: [
-        "csv",
-        "data",
-        "analyze",
-        "dataframe"
-      ],
-      numpy: [
-        "math",
-        "calculate",
-        "array",
-        "numeric"
-      ],
-      tkinter: [
-        "gui",
-        "window",
-        "interface",
-        "dialog"
-      ],
-      sqlite3: [
-        "database",
-        "sqlite",
-        "db"
-      ],
-      json: [
-        "json",
-        "api",
-        "parse"
-      ],
-      os: [
-        "file",
-        "directory",
-        "path",
-        "system"
-      ],
-      subprocess: [
-        "command",
-        "execute",
-        "run",
-        "process"
-      ],
-      logging: [
-        "log",
-        "debug",
-        "error",
-        "warning"
-      ],
+      requests: ["api", "http", "web", "download"],
+      pandas: ["csv", "data", "analyze", "dataframe"],
+      numpy: ["math", "calculate", "array", "numeric"],
+      tkinter: ["gui", "window", "interface", "dialog"],
+      sqlite3: ["database", "sqlite", "db"],
+      json: ["json", "api", "parse"],
+      os: ["file", "directory", "path", "system"],
+      subprocess: ["command", "execute", "run", "process"],
+      logging: ["log", "debug", "error", "warning"],
     };
 
-    Object.entries(libraryHints).forEach(([library, hints
-    ]) => {
+    Object.entries(libraryHints).forEach(([library, hints]) => {
       if (hints.some((hint) => text.includes(hint))) {
         requirements.libraries.push(library);
       }
@@ -919,14 +735,12 @@ export class EnhancedNLPParser {
     // Entity confidence contribution
     const avgEntityConfidence =
       entities.length > 0
-        ? entities.reduce((sum, entity) => sum + entity.confidence,
-    0) /
+        ? entities.reduce((sum, entity) => sum + entity.confidence, 0) /
           entities.length
         : 0.5;
 
     confidence = (confidence + avgEntityConfidence) / 2;
 
-    return Math.min(confidence,
-    1.0);
+    return Math.min(confidence, 1.0);
   }
 }
