@@ -83,3 +83,10 @@ target/
 # Thumbs
 Thumbs.db
 deprecated/
+node_modules
+.env
+.vscode
+.gradle
+
+tar
+node_modules/
