@@ -7,13 +7,16 @@ node_modules/
 *.env.*
 /alsania-rules/
 alsania-rules.*
+alsania-code.*
+/rules
+/rules
 .secrets.env
 .env.secrets
 .env.dev
 .env.prod
 .venv/
 venv
-/venv/
+/venv
 venv/
 
 # Logs
@@ -35,9 +38,11 @@ dist/
 build/
 *.js.map
 
-# Python
+# Venv
 __pycache__/
+.pytest_cache/
+__init__.py
+.Python
 *.pyc
 *.pyo
 *.pyd
-.Python
