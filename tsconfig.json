@@ -49,7 +49,6 @@
     "tests",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/integrations/**/*",
-    "core/**/*"
+    "src/integrations/**/*"
   ]
 }

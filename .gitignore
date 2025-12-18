@@ -1,92 +1,48 @@
-```
-# Backup files
-*.backup
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
+# Dependencies
+node_modules/
 
 # Environment
 .env
 .env.local
 *.env.*
+/alsania-rules/
+alsania-rules.*
+alsania-code.*
+/rules
+/rules
+.secrets.env
+.env.secrets
+.env.dev
+.env.prod
+.venv/
+venv
+/venv
+venv/
 
-# Editors
+# Logs
+*.log
+
+# Editor/IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
+.deprecated/
+deprecated/
+/.deprecated/
+/deprecated/
 
-# Python
+# Build outputs
+dist/
+build/
+*.js.map
+
+# Venv
 __pycache__/
+.pytest_cache/
+__init__.py
+.Python
 *.pyc
 *.pyo
 *.pyd
-
-# Node
-node_modules/
-
-# Build artifacts
-dist/
-build/
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-
-# Compression
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# MyPy
-.mypy_cache/
-
-# PyTest
-.pytest_cache/
-
-# Gradle
-.gradle/
-
-# Target
-target/
-
-# DS_Store
-.DS_Store
-
-# Thumbs
-Thumbs.db
-deprecated/
-node_modules
-.env
-.vscode
-.gradle
-
-tar
-node_modules/
