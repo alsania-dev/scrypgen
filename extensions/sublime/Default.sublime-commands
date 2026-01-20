@@ -1,0 +1,14 @@
+[
+  {
+    "caption": "ScrypGen: Generate Script",
+    "command": "scrypgen_generate_script",
+  },
+  {
+    "caption": "ScrypGen: Generate Script from Selection",
+    "command": "scrypgen_generate_script_from_selection",
+  },
+  {
+    "caption": "ScrypGen: Show Menu",
+    "command": "scrypgen_show_menu",
+  },
+]

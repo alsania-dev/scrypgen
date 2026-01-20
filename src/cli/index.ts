@@ -10,10 +10,10 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import ora from "ora";
 import boxen from "boxen";
-import { UniversalScriptGenerator } from "../core/script-generator";
+import { UniversalScrypGenerator } from "../core/script-generator";
 import {
   GeneratorConfig,
-  ScriptGenerationRequest,
+  ScrypGenerationRequest,
   Logger,
   Integration,
 } from "../core/types";
@@ -42,8 +42,8 @@ const logger: Logger = {
     process.env.DEBUG && console.log(theme.dim(`🐛 ${msg}`), meta || ""),
 };
 
-class UniversalScriptGeneratorCLI {
-  private generator: UniversalScriptGenerator;
+class UniversalScrypGeneratorCLI {
+  private generator: UniversalScrypGenerator;
   private program: Command;
 
   constructor() {
@@ -64,14 +64,14 @@ class UniversalScriptGeneratorCLI {
       alsaniaCompliance: true,
     };
 
-    this.generator = new UniversalScriptGenerator(config, logger);
+    this.generator = new UniversalScrypGenerator(config, logger);
   }
 
   private setupCommands(): void {
     this.program
       .name("scrypgen")
       .description(
-        "🔮 ScrypGen - Transform natural language into powerful scripts"
+        "🔮 ScrypGen - Transform natural language into powerful scripts",
       )
       .version("1.0.0")
       .option("-v, --verbose", "Enable verbose logging")
@@ -89,12 +89,12 @@ class UniversalScriptGeneratorCLI {
       .description("Generate a script from natural language description")
       .argument(
         "<description>",
-        "Natural language description of what the script should do"
+        "Natural language description of what the script should do",
       )
       .option(
         "-l, --language <lang>",
         "Target language (python, bash, auto)",
-        "auto"
+        "auto",
       )
       .option("-o, --output <path>", "Output file path")
       .option("--nemo", "Generate Nemo file manager integration")
@@ -155,7 +155,7 @@ class UniversalScriptGeneratorCLI {
     // About command
     this.program
       .command("about")
-      .description("Show information about Universal Script Generator")
+      .description("Show information about ScripGen")
       .action(() => {
         this.showAbout();
       });
@@ -163,7 +163,7 @@ class UniversalScriptGeneratorCLI {
 
   private async generateCommand(
     description: string,
-    options: any
+    options: any,
   ): Promise<void> {
     try {
       this.showHeader();
@@ -180,7 +180,7 @@ class UniversalScriptGeneratorCLI {
         integrations.push({ type: "kde-connect", enabled: true });
       if (options.vscode) integrations.push({ type: "vscode", enabled: true });
 
-      const request: ScriptGenerationRequest = {
+      const request: ScrypGenerationRequest = {
         description,
         language: options.language === "auto" ? undefined : options.language,
         ...(integrations.length > 0 && {
@@ -216,7 +216,7 @@ class UniversalScriptGeneratorCLI {
               margin: 1,
               borderStyle: "double",
               borderColor: "cyan",
-            })
+            }),
           );
         }
         // Show integration files
@@ -326,7 +326,7 @@ class UniversalScriptGeneratorCLI {
 
   private async kdeTransformCommand(
     command: string,
-    options: any
+    options: any,
   ): Promise<void> {
     try {
       this.showHeader();
@@ -338,7 +338,7 @@ class UniversalScriptGeneratorCLI {
 
       const result = await this.generator.generateKDEConnectScript(
         `Transform the command: ${command}`,
-        command
+        command,
       );
 
       spinner.stop();
@@ -358,21 +358,21 @@ class UniversalScriptGeneratorCLI {
               margin: 1,
               borderStyle: "double",
               borderColor: "magenta",
-            })
+            }),
           );
         }
 
         console.log(theme.primary("\\n📋 Setup Instructions:"));
         console.log(
-          theme.dim("1. Save the script to a file (e.g., kde_command.sh)")
+          theme.dim("1. Save the script to a file (e.g., kde_command.sh)"),
         );
         console.log(
-          theme.dim("2. Make it executable: chmod +x kde_command.sh")
+          theme.dim("2. Make it executable: chmod +x kde_command.sh"),
         );
         console.log(
           theme.dim(
-            "3. Configure KDE Connect to run this script from your phone"
-          )
+            "3. Configure KDE Connect to run this script from your phone",
+          ),
         );
       } else {
         console.log(theme.error("💥 KDE transformation failed!"));
@@ -388,7 +388,7 @@ class UniversalScriptGeneratorCLI {
 
   private async nemoActionCommand(
     description: string,
-    options: any
+    options: any,
   ): Promise<void> {
     try {
       this.showHeader();
@@ -400,7 +400,7 @@ class UniversalScriptGeneratorCLI {
 
       const result = await this.generator.generateNemoAction(
         description,
-        options.name
+        options.name,
       );
 
       spinner.stop();
@@ -414,7 +414,7 @@ class UniversalScriptGeneratorCLI {
         // Save main script
         const scriptPath = path.join(
           outputDir,
-          `${options.name.toLowerCase().replace(/\\s+/g, "_")}.sh`
+          `${options.name.toLowerCase().replace(/\\s+/g, "_")}.sh`,
         );
         await this.saveScript(result.code, scriptPath, "bash");
 
@@ -430,10 +430,12 @@ class UniversalScriptGeneratorCLI {
         console.log(theme.primary("\\n📋 Installation Instructions:"));
         console.log(theme.dim(`1. Copy ${scriptPath} to a permanent location`));
         console.log(
-          theme.dim("2. Copy .nemo_action file to ~/.local/share/nemo/actions/")
+          theme.dim(
+            "2. Copy .nemo_action file to ~/.local/share/nemo/actions/",
+          ),
         );
         console.log(
-          theme.dim("3. Update the Exec path in the .nemo_action file")
+          theme.dim("3. Update the Exec path in the .nemo_action file"),
         );
         console.log(theme.dim("4. Restart Nemo to see the new action"));
       } else {
@@ -514,7 +516,7 @@ class UniversalScriptGeneratorCLI {
       console.log(theme.dim("The application window should open momentarily."));
     } catch (error) {
       console.log(
-        theme.error(`💥 Failed to launch GUI: ${(error as Error).message}`)
+        theme.error(`💥 Failed to launch GUI: ${(error as Error).message}`),
       );
       console.log(theme.secondary("Try running: npm run gui"));
       process.exit(1);
@@ -534,7 +536,7 @@ class UniversalScriptGeneratorCLI {
         borderStyle: "double",
         borderColor: "cyan",
         textAlignment: "center",
-      }
+      },
     );
 
     console.log(header);
@@ -547,8 +549,8 @@ class UniversalScriptGeneratorCLI {
     console.log();
     console.log(
       theme.text(
-        "A revolutionary tool that transforms natural language descriptions"
-      )
+        "A revolutionary tool that transforms natural language descriptions",
+      ),
     );
     console.log(theme.text("into production-ready Python and Bash scripts."));
     console.log();
@@ -556,7 +558,7 @@ class UniversalScriptGeneratorCLI {
     console.log(theme.dim("  • 🧠 Advanced NLP for intent understanding"));
     console.log(theme.dim("  • 🎨 Beautiful Alsania-themed script templates"));
     console.log(
-      theme.dim("  • 🔗 Deep integrations (Nemo, KDE Connect, VS Code)")
+      theme.dim("  • 🔗 Deep integrations (Nemo, KDE Connect, VS Code)"),
     );
     console.log(theme.dim("  • 🛡️  Built-in security validation"));
     console.log(theme.dim("  • 📱 Cross-platform compatibility"));
@@ -564,16 +566,16 @@ class UniversalScriptGeneratorCLI {
     console.log();
     console.log(theme.primary("🏛️  Alsania Ecosystem:"));
     console.log(
-      theme.dim("  Built for digital sovereignty and developer empowerment.")
+      theme.dim("  Built for digital sovereignty and developer empowerment."),
     );
     console.log(
       theme.dim(
-        "  Every script generated carries the mark of quality and freedom."
-      )
+        "  Every script generated carries the mark of quality and freedom.",
+      ),
     );
     console.log();
     console.log(
-      theme.accent("💙 Created with passion for the developer community")
+      theme.accent("💙 Created with passion for the developer community"),
     );
   }
 
@@ -583,14 +585,14 @@ class UniversalScriptGeneratorCLI {
     console.log(theme.dim(`  • Complexity: ${metadata.estimatedComplexity}`));
     console.log(
       theme.dim(
-        `  • Dependencies: ${metadata.dependencies.join(", ") || "None"}`
-      )
+        `  • Dependencies: ${metadata.dependencies.join(", ") || "None"}`,
+      ),
     );
     console.log(theme.dim(`  • Platform: ${metadata.platform.join(", ")}`));
     console.log(
       theme.dim(
-        `  • Generated: ${new Date(metadata.generatedAt).toLocaleString()}`
-      )
+        `  • Generated: ${new Date(metadata.generatedAt).toLocaleString()}`,
+      ),
     );
     console.log();
   }
@@ -598,7 +600,7 @@ class UniversalScriptGeneratorCLI {
   private async saveScript(
     code: string,
     filePath: string,
-    language: string
+    language: string,
   ): Promise<void> {
     // Ensure directory exists
     await fs.ensureDir(path.dirname(filePath));
@@ -628,8 +630,8 @@ class UniversalScriptGeneratorCLI {
 }
 // Run CLI if this file is executed directly
 if (require.main === module) {
-  const cli = new UniversalScriptGeneratorCLI();
+  const cli = new UniversalScrypGeneratorCLI();
   cli.run();
 }
 
-export { UniversalScriptGeneratorCLI };
+export { UniversalScrypGeneratorCLI };

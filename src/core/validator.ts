@@ -1,9 +1,7 @@
-import { ValidationResult, Logger
-} from "./types";
+import { ValidationResult, Logger } from "./types";
 import * as fs from "fs-extra";
 import * as path from "path";
-import { spawn
-} from "child_process";
+import { spawn } from "child_process";
 
 interface HealthCheckResult {
   python: boolean;
@@ -26,8 +24,7 @@ export class ScriptValidator {
    *
    * @returns Promise resolving to health check result with status and details
    */
-  async healthCheck(): Promise<{ healthy: boolean; details: any
-  }> {
+  async healthCheck(): Promise<{ healthy: boolean; details: any }> {
     const result: HealthCheckResult = {
       python: false,
       bash: false,
@@ -37,41 +34,31 @@ export class ScriptValidator {
 
     // Check Python availability
     try {
-      const pythonCheck = await this.runCommand("python3",
-      [
-        "--version"
-      ]);
+      const pythonCheck = await this.runCommand("python3", ["--version"]);
       result.python = pythonCheck.exitCode === 0;
     } catch (error) {
       this.logger.warn("Python check failed", error);
     }
     // Check Bash availability
     try {
-      const bashCheck = await this.runCommand("bash",
-      [
-        "--version"
-      ]);
+      const bashCheck = await this.runCommand("bash", ["--version"]);
       result.bash = bashCheck.exitCode === 0;
     } catch (error) {
       this.logger.warn("Bash check failed", error);
     }
     // Check if temp directory is writable
     try {
-      const testFile = path.join(this.tempDir, `test_${Date.now()
-      }`);
-      await fs.writeFile(testFile,
-      "test");
+      const testFile = path.join(this.tempDir, `test_${Date.now()}`);
+      await fs.writeFile(testFile, "test");
       await fs.remove(testFile);
       result.tempDir = true;
     } catch (error) {
       this.logger.warn("Temp directory check failed", error);
     }
 
-    result.message = `Health Check - Python: ${result.python
-    }, Bash: ${
+    result.message = `Health Check - Python: ${result.python}, Bash: ${
       result.bash
-    }, TempDir: ${result.tempDir
-    }`;
+    }, TempDir: ${result.tempDir}`;
 
     // Determine overall health
     const healthy = result.python && result.bash && result.tempDir;
@@ -98,16 +85,12 @@ export class ScriptValidator {
       throw new Error("Code parameter must be a non-empty string");
     }
 
-    if (!language || ![
-      "python",
-      "bash"
-    ].includes(language)) {
+    if (!language || !["python", "bash"].includes(language)) {
       throw new Error('Language must be either "python" or "bash"');
     }
 
     try {
-      this.logger.debug("Validating script",
-      {
+      this.logger.debug("Validating script", {
         language,
         codeLength: code.length,
       });
@@ -123,8 +106,7 @@ export class ScriptValidator {
         recommendations,
       };
 
-      this.logger.debug("Validation complete",
-      {
+      this.logger.debug("Validation complete", {
         isValid: result.isValid,
         errorCount: syntaxErrors.length,
         warningCount: securityWarnings.length,
@@ -135,9 +117,7 @@ export class ScriptValidator {
       this.logger.error("Validation failed", error);
       return {
         isValid: false,
-        syntaxErrors: [`Validation error: ${error
-          }`
-        ],
+        syntaxErrors: [`Validation error: ${error}`],
         securityWarnings: [],
         recommendations: [],
       };
@@ -160,36 +140,29 @@ export class ScriptValidator {
       if (language === "python") {
         const tempFile = path.join(
           this.tempDir,
-          `script_validation_${Date.now()
-        }.py`,
+          `script_validation_${Date.now()}.py`,
         );
         await fs.writeFile(tempFile, code);
 
-        const result = await this.runCommand("python3",
-        [
+        const result = await this.runCommand("python3", [
           "-m",
           "py_compile",
           tempFile,
         ]);
 
         if (result.exitCode !== 0) {
-          errors.push(`Python syntax error: ${result.stderr
-          }`);
+          errors.push(`Python syntax error: ${result.stderr}`);
         }
 
         await fs.remove(tempFile);
       } else if (language === "bash") {
         const tempFile = path.join(
           this.tempDir,
-          `script_validation_${Date.now()
-        }.sh`,
+          `script_validation_${Date.now()}.sh`,
         );
         await fs.writeFile(tempFile, code);
 
-        const result = await this.runCommand("bash",
-        [
-          "-n", tempFile
-        ]);
+        const result = await this.runCommand("bash", ["-n", tempFile]);
 
         if (result.exitCode !== 0) {
           const errorLines = result.stderr
@@ -202,26 +175,19 @@ export class ScriptValidator {
             );
 
           if (errorLines.length > 0) {
-            errors.push(`Bash syntax error: ${errorLines[
-                0
-              ]
-            }`);
+            errors.push(`Bash syntax error: ${errorLines[0]}`);
           } else {
             errors.push(
               `Bash syntax error: ${
-                result.stderr.split("\n")[
-                0
-              ] || "Unknown syntax error"
-            }`,
+                result.stderr.split("\n")[0] || "Unknown syntax error"
+              }`,
             );
           }
         }
-
-        await fs.remove(tempFile);
+        // await fs.remove(tempFile); // Temporarily disabled for debugging
       }
     } catch (error) {
-      this.logger.warn("Could not perform syntax validation",
-      {
+      this.logger.warn("Could not perform syntax validation", {
         language,
         error,
       });
@@ -251,11 +217,11 @@ export class ScriptValidator {
     const sudoRegex = /\bsudo\b/gi;
     const passwordRegex = new RegExp(
       "\\bpassword\\s*=\\s*['\"][^'\"]*['\"]",
-    "gi",
+      "gi",
     );
     const apiKeyRegex = new RegExp(
       "\\b(api_key|secret|token)\\s*=\\s*['\"][^'\"]*['\"]",
-    "gi",
+      "gi",
     );
     const osSystemRegex = /\bos\.system\s*\(/gi;
     const osPopenRegex = /\bos\.popen\s*\(/gi;
@@ -304,8 +270,7 @@ export class ScriptValidator {
     ];
 
     // Check patterns
-    for (const { regex, msg
-    } of patterns) {
+    for (const { regex, msg } of patterns) {
       if (regex.test(code)) {
         warnings.push(msg);
       }
@@ -331,8 +296,7 @@ export class ScriptValidator {
       }
     } else if (language === "bash") {
       if (
-        new RegExp("\\$\\([^)]*\\)",
-      "g").test(code) &&
+        new RegExp("\\$\\([^)]*\\)", "g").test(code) &&
         !/#\s*safe\s+command\s+substitution/gi.test(code)
       ) {
         warnings.push(
@@ -344,8 +308,7 @@ export class ScriptValidator {
         warnings.push("Security warning: Accessing sensitive system files");
       }
 
-      if (new RegExp("\\$\\{[^}]*\\}",
-      "g").test(code) && /\$\d+/g.test(code)) {
+      if (new RegExp("\\$\\{[^}]*\\}", "g").test(code) && /\$\d+/g.test(code)) {
         warnings.push(
           "Security warning: Unquoted parameter expansion - word splitting risk",
         );
@@ -393,34 +356,34 @@ export class ScriptValidator {
         recommendations.push(
           "Consider adding docstrings for better documentation",
         );
-    }
+      }
 
       if (code.includes("import *")) {
         recommendations.push(
           "Avoid wildcard imports - import specific functions instead",
         );
-    }
-  } else if (language === "bash") {
+      }
+    } else if (language === "bash") {
       if (!code.includes("set -e")) {
         recommendations.push(
           'Consider adding "set -e" for better error handling',
         );
-    }
+      }
 
       if (
         !code.includes("#!/usr/bin/env bash") &&
         !code.includes("#!/bin/bash")
       ) {
         recommendations.push("Add proper shebang line for better portability");
-    }
+      }
 
       if (code.includes("$1") && !code.includes("$#")) {
         recommendations.push(
           "Consider checking argument count before using positional parameters",
         );
+      }
     }
-  }
-  // Alsania compliance
+    // Alsania compliance
     if (
       !code.includes("Alsania") &&
       !code.includes("Sigma") &&
@@ -429,11 +392,11 @@ export class ScriptValidator {
       recommendations.push(
         "Consider adding Alsania compliance markers for project alignment",
       );
-  }
+    }
 
     return recommendations;
-}
-/**
+  }
+  /**
    * Executes a command and returns the result.
    *
    * @param command - The command to execute
@@ -443,44 +406,40 @@ export class ScriptValidator {
   private async runCommand(
     command: string,
     args: string[],
-  ): Promise<{ exitCode: number; stdout: string; stderr: string
-}> {
+  ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
-      const process = spawn(command, args,
-    { stdio: "pipe"
-    });
+      const process = spawn(command, args, { stdio: "pipe" });
 
       let stdout = "";
       let stderr = "";
 
       process.stdout?.on("data", (data) => {
         stdout += data.toString();
-    });
+      });
 
       process.stderr?.on("data", (data) => {
         stderr += data.toString();
-    });
+      });
 
       process.on("close", (code) => {
         resolve({
           exitCode: code || 0,
           stdout: stdout.trim(),
           stderr: stderr.trim(),
+        });
       });
-    });
 
       process.on("error", (error) => {
         reject(error);
-    });
+      });
 
       // Timeout after 10 seconds
       setTimeout(() => {
         process.kill("SIGKILL");
         reject(new Error("Command timeout"));
-    },
-    10000);
-  });
-}
+      }, 10000);
+    });
+  }
 }
 
 export default ScriptValidator;

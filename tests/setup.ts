@@ -1,8 +1,7 @@
 /**
- * Test Setup for Universal Script Generator
+ * Test Setup for ScripGen
  * Alsania aligned - built by Sigma, powered by Echo
  */
-
 // Mock console methods to avoid noise in tests
 global.console = {
   ...console,

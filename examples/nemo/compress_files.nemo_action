@@ -1,0 +1,8 @@
+[Nemo Action]
+Name=Compress Selected Files
+Comment=Compress selected files into a ZIP archive using ScripGen
+Exec=/usr/bin/bash -c "zip -r '%N.zip' %F && notify-send 'Compression Complete' 'Files compressed successfully'"
+Icon-Name=archive-insert
+Selection=notnone
+Extensions=any;
+Mimetypes=application/octet-stream;

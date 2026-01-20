@@ -327,7 +327,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ### Core Classes
 
-#### `UniversalScriptGenerator`
+#### `UniversalScrypGenerator`
 
 Main orchestrator class that coordinates all components.
 
@@ -435,16 +435,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Echo**: AI coordination and testing
 - **Alsania Community**: Feedback and contributions
 - **Open Source Libraries**: Building on the shoulders of giants
-
-## 🔮 Alsania Ecosystem
-
-ScrypGen is part of the larger Alsania ecosystem for digital sovereignty:
-
-- **[Alsania Core](https://github.com/alsania/core)**: Foundational protocols
-- **[Alsania Desktop](https://github.com/alsania/desktop)**: Native applications
-- **[Alsania Mobile](https://github.com/alsania/mobile)**: Mobile integration
-- **[Alsania Web](https://github.com/alsania/web)**: Browser extensions
-- **[ScrypGen](https://github.com/alsania/scrypgen)**: AI-powered script generation (CLI + GUI)
 
 ---
 

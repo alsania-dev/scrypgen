@@ -15,7 +15,7 @@ NC := \033[0m
 ## Show this help message
 help:
 	@echo ""
-	@echo "$(CYAN)🔮 Universal Script Generator - Makefile$(NC)"
+	@echo "$(CYAN)🔮 ScripGen - Makefile$(NC)"
 	@echo "$(GREEN)Alsania Protocol v1.0 • Built by Sigma • Powered by Echo$(NC)"
 	@echo ""
 	@echo "$(PURPLE)Available commands:$(NC)"
@@ -82,7 +82,7 @@ health:
 install-global: build
 	@echo "$(CYAN)🌍 Installing globally...$(NC)"
 	npm link
-	@echo "$(GREEN)✅ Global installation complete! Use 'scriptgen' command$(NC)"
+	@echo "$(GREEN)✅ Global installation complete! Use 'scrypgen' command$(NC)"
 
 ## Build extensions for IDEs
 build-extensions:
@@ -95,20 +95,20 @@ setup-nemo:
 	@echo "$(CYAN)📁 Setting up Nemo integration...$(NC)"
 	@mkdir -p ~/.local/share/nemo/actions
 	@echo "$(GREEN)✅ Nemo actions directory created!$(NC)"
-	@echo "$(PURPLE)Use 'scriptgen nemo-action' to create actions$(NC)"
+	@echo "$(PURPLE)Use 'scrypgen nemo-action' to create actions$(NC)"
 
 ## Setup KDE Connect integration  
 setup-kde:
 	@echo "$(CYAN)📱 Setting up KDE Connect integration...$(NC)"
 	@mkdir -p ~/.config/kdeconnect
 	@echo "$(GREEN)✅ KDE Connect directory created!$(NC)"
-	@echo "$(PURPLE)Use 'scriptgen kde-transform' to create commands$(NC)"
+	@echo "$(PURPLE)Use 'scrypgen kde-transform' to create commands$(NC)"
 
 ## Full setup - install, build, and configure integrations
 setup-all: install build install-global setup-nemo setup-kde health
 	@echo ""
-	@echo "$(GREEN)🎉 Universal Script Generator is ready!$(NC)"
-	@echo "$(CYAN)Try: scriptgen interactive$(NC)"
+	@echo "$(GREEN)🎉 ScripGen is ready!$(NC)"
+	@echo "$(CYAN)Try: scripgen interactive$(NC)"
 	@echo ""
 
 ## Run example generation
@@ -131,12 +131,12 @@ production: clean install build test lint
 ## Show project information
 info:
 	@echo ""
-	@echo "$(CYAN)🔮 Universal Script Generator$(NC)"
+	@echo "$(CYAN)🔮 ScripGen$(NC)"
 	@echo "$(GREEN)================================$(NC)"
 	@echo "$(PURPLE)Version:$(NC) $(shell node -p "require('./package.json').version")"
-	@echo "$(PURPLE)Author:$(NC) Sigma <sigma@alsania.dev>"
+	@echo "$(PURPLE)Author:$(NC) Alsania I/O"
 	@echo "$(PURPLE)License:$(NC) MIT"
-	@echo "$(PURPLE)Repository:$(NC) https://github.com/alsania/universal-script-generator"
+	@echo "$(PURPLE)Repository:$(NC) https://github.com/alsania-dev/ScrypGen"
 	@echo ""
 	@echo "$(PURPLE)Alsania Protocol:$(NC) v1.0"
 	@echo "$(PURPLE)Built by:$(NC) Sigma"
@@ -145,7 +145,7 @@ info:
 
 ## Interactive setup wizard
 setup-wizard:
-	@echo "$(CYAN)🧙‍♂️ Universal Script Generator Setup Wizard$(NC)"
+	@echo "$(CYAN)🧙‍♂️ ScripGen Setup Wizard$(NC)"
 	@echo ""
 	@echo "$(PURPLE)This will guide you through the complete setup process.$(NC)"
 	@echo ""
@@ -155,9 +155,9 @@ setup-wizard:
 	@echo "$(GREEN)🎊 Setup complete! Ready to generate scripts!$(NC)"
 	@echo ""
 	@echo "$(PURPLE)Quick start commands:$(NC)"
-	@echo "  $(CYAN)scriptgen interactive$(NC)        - Interactive wizard"
-	@echo "  $(CYAN)scriptgen about$(NC)              - Show information"
-	@echo "  $(CYAN)scriptgen health$(NC)             - Check system health"
+	@echo "  $(CYAN)scrypgen interactive$(NC)        - Interactive wizard"
+	@echo "  $(CYAN)scrypgen about$(NC)              - Show information"
+	@echo "  $(CYAN)scrypgen health$(NC)             - Check system health"
 	@echo ""
 
 ## Create example scripts for testing

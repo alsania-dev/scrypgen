@@ -1,0 +1,30 @@
+<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .neon-green { fill: #00ff7f; }
+      .electric-cyan { fill: #00ffff; }
+      .navy { fill: #0a0a0f; }
+      .text-shadow { filter: drop-shadow(0 0 3px #00ff7f); }
+    </style>
+  </defs>
+
+  <!-- Background code-like structure -->
+  <rect x="0" y="0" width="120" height="40" fill="#0a0a0f" rx="4"/>
+
+  <!-- Code snippet simulation -->
+  <text x="5" y="15" font-family="monospace" font-size="10" fill="#666666"><</text>
+  <text x="12" y="15" font-family="monospace" font-size="10" class="neon-green">ScrypGen</text>
+  <text x="65" y="15" font-family="monospace" font-size="10" fill="#666666">></text>
+
+  <text x="5" y="28" font-family="monospace" font-size="8" fill="#00ffff">def</text>
+  <text x="25" y="28" font-family="monospace" font-size="8" fill="#ffffff">transform</text>
+  <text x="65" y="28" font-family="monospace" font-size="8" fill="#666666">(</text>
+  <text x="72" y="28" font-family="monospace" font-size="8" fill="#ffaa00">ideas</text>
+  <text x="95" y="28" font-family="monospace" font-size="8" fill="#666666">):</text>
+
+  <text x="5" y="38" font-family="monospace" font-size="8" fill="#666666">    return</text>
+  <text x="45" y="38" font-family="monospace" font-size="8" fill="#00ff7f">code</text>
+
+  <!-- Neon glow effect -->
+  <rect x="0" y="0" width="120" height="40" fill="none" stroke="#00ff7f" stroke-width="0.5" opacity="0.3" rx="4"/>
+</svg>

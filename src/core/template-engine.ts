@@ -15,6 +15,10 @@ export interface TemplateResult {
 export class TemplateEngine {
   private templates: Map<string, Template>;
   private compiledTemplates: Map<string, HandlebarsTemplateDelegate>;
+  private templateCache: Map<
+    string,
+    { compiled: HandlebarsTemplateDelegate; lastUsed: number }
+  >;
   private config: GeneratorConfig;
   private logger: Logger;
 
@@ -23,6 +27,7 @@ export class TemplateEngine {
     this.logger = logger;
     this.templates = new Map();
     this.compiledTemplates = new Map();
+    this.templateCache = new Map();
 
     // Config will be used for loading custom templates from templateDirectory
     void this.config; // TODO: Implement custom template loading
@@ -95,19 +100,19 @@ check_dependencies() {
 
     Handlebars.registerHelper("neonColors", () => {
       return new Handlebars.SafeString(`# Alsania Neon Color Scheme
-GREEN='\x1b[
+GREEN=$'\\x1b[
         0;32m'    # Neon Green
-CYAN='\x1b[
+CYAN=$'\\x1b[
           0;36m'     # Electric Cyan
-PURPLE='\x1b[
+PURPLE=$'\\x1b[
             0;35m'   # Royal Purple
-NAVY='\x1b[
+NAVY=$'\\x1b[
               0;34m'     # Deep Navy
-YELLOW='\x1b[
+YELLOW=$'\\x1b[
                 1;33m'   # Bright Yellow
-RED='\x1b[
+RED=$'\\x1b[
                   0;31m'      # Alert Red
-NC='\x1b[
+NC=$'\\x1b[
                     0m'          # No Color`);
     });
   }
@@ -205,12 +210,17 @@ NC='\x1b[
     });
 
     // Bash Templates
+    const bashBasicContent = this.getBashBasicTemplate();
+    this.logger.debug(
+      "Registering bash_basic template with content length:",
+      bashBasicContent.length,
+    );
     this.registerTemplate({
       name: "bash_basic",
       language: "bash",
       category: "basic",
       description: "Basic Bash script with Alsania styling",
-      content: this.getBashBasicTemplate(),
+      content: bashBasicContent,
       variables: [
         {
           name: "description",
@@ -297,6 +307,7 @@ NC='\x1b[
 
     this.logger.info("Built-in templates loaded", {
       count: this.templates.size,
+      templates: Array.from(this.templates.keys()),
       alsaniaCompliant: Array.from(this.templates.values()).every(
         (t) => t.alsaniaCompliant,
       ),
@@ -308,6 +319,10 @@ NC='\x1b[
     nlpAnalysis: NLPAnalysis,
     overrides: Record<string, any>,
   ): Promise<TemplateResult> {
+    this.logger.debug("processTemplate called", {
+      language,
+      intent: nlpAnalysis.intent.primary,
+    });
     try {
       // Select appropriate template
       const template = this.selectTemplate(language, nlpAnalysis);
@@ -321,7 +336,10 @@ NC='\x1b[
 
       // Compile and render template
       const compiledTemplate = this.getCompiledTemplate(template);
+      this.logger.debug("Rendering template with variables:", variables);
       const code = compiledTemplate(variables);
+      this.logger.debug("Template rendered, code length:", code.length);
+      this.logger.debug("Rendered code preview:", code.substring(0, 200));
 
       // Extract dependencies
       const dependencies = this.extractDependencies(template, variables);
@@ -360,6 +378,12 @@ NC='\x1b[
       (t) => t.language === language,
     );
 
+    this.logger.debug("Template selection", {
+      language,
+      intent: nlpAnalysis.intent.primary,
+      candidates: candidates.map((c) => c.name),
+    });
+
     // Intent-based template selection
     switch (nlpAnalysis.intent.primary) {
       case "gui_application":
@@ -393,7 +417,9 @@ NC='\x1b[
         );
 
       default:
-        return candidates.find((t) => t.category === "basic")!;
+        const selected = candidates.find((t) => t.category === "basic")!;
+        this.logger.debug("Selected template", { name: selected.name });
+        return selected;
     }
   }
 
@@ -486,11 +512,31 @@ NC='\x1b[
   }
 
   private getCompiledTemplate(template: Template): HandlebarsTemplateDelegate {
-    if (!this.compiledTemplates.has(template.name)) {
+    this.logger.debug(
+      `Compiling template: ${template.name}, content length: ${
+        template.content.length
+      }`,
+    );
+    this.logger.debug(
+      `Template content preview:`,
+      template.content.substring(0, 100),
+    );
+    try {
       const compiled = Handlebars.compile(template.content);
-      this.compiledTemplates.set(template.name, compiled);
+      this.logger.debug(`Successfully compiled template: ${template.name}`);
+
+      // Test the compilation with a simple variable
+      const testResult = compiled({ test: "working" });
+      this.logger.debug(
+        `Test compilation result:`,
+        testResult.substring(0, 50),
+      );
+
+      return compiled;
+    } catch (error) {
+      this.logger.error(`Failed to compile template ${template.name}:`, error);
+      throw error;
     }
-    return this.compiledTemplates.get(template.name)!;
   }
 
   private extractDependencies(
@@ -557,7 +603,14 @@ NC='\x1b[
 
   registerTemplate(template: Template): void {
     this.templates.set(template.name, template);
-    this.compiledTemplates.delete(template.name); // Force recompilation
+    // Clear both old and new caches to force recompilation
+    this.compiledTemplates.delete(template.name);
+    // Clear any cached versions with different content lengths
+    for (const key of Array.from(this.templateCache.keys())) {
+      if (key.startsWith(`${template.name}_`)) {
+        this.templateCache.delete(key);
+      }
+    }
     this.logger.debug("Template registered", {
       name: template.name,
       language: template.language,
@@ -618,19 +671,25 @@ NC='\x1b[
   // Template content methods
   private getPythonBasicTemplate(): string {
     return `#!/usr/bin/env python3
-"""{{description}}
-Generated by Universal Script Generator
-{
-                    {alsaniaSignature
-                    }
-                  }
-"""{{#if imports}}{{pythonImports imports
+"""{{description
                 }
               }
+Generated by ScripGen
 {
-                {/if
+                {alsaniaSignature
                 }
               }
+"""{{#if imports
+            }
+          }
+{
+            {pythonImports imports
+            }
+          }
+{
+            {/if
+            }
+          }
 import logging
 from datetime import datetime
 
@@ -646,23 +705,23 @@ def main(): """Main execution function"""
     logger.info("🚀 Starting script execution...")
 
     try: {
-                {#if mainLogic
-                }
-              }
+            {#if mainLogic
+            }
+          }
 {
-                {mainLogic
-                }
-              }
-        {
-                {else
-                }
-              }
+            {mainLogic
+            }
+          }
+{
+            {else
+            }
+          }
         # Add your main logic here
         print("Hello, World!")
-        {
-                {/if
-                }
-              }
+{
+            {/if
+            }
+          }
 
         logger.info("✨ Script completed successfully!")
 
@@ -677,13 +736,13 @@ if __name__ == "__main__":
   private getPythonGUITemplate(): string {
     return `#!/usr/bin/env python3
 """{{description
-            }
-          }
+        }
+      }
 Alsania-themed GUI Application
 {
-            {alsaniaSignature
-            }
-          }
+        {alsaniaSignature
+        }
+      }
 """
 
 import tkinter as tk
@@ -700,94 +759,94 @@ COLORS = {
     'royal_purple': '#8a2be2',  # Royal purple
     'text_white': '#ffffff',    # Pure white text
     'text_gray': '#b0b0b0'     # Secondary text
-          }
+      }
 
 class {
-            {appName
-            }
-          }App:
+        {appName
+        }
+      }App:
     def __init__(self, root):
         self.root = root
         self.setup_window()
         self.setup_theme()
         self.create_widgets()
-        
+
     def setup_window(self): """Configure main window with Alsania styling"""
         self.root.title("{{appName}} - Powered by Alsania")
         self.root.geometry("800x600")
         self.root.configure(bg=COLORS['bg_dark'
-          ])
-        
+      ])
+
         # Center window on screen
         self.root.update_idletasks()
         x = (self.root.winfo_screenwidth() - self.root.winfo_reqwidth()) // 2
         y = (self.root.winfo_screenheight() - self.root.winfo_reqheight()) // 2
         self.root.geometry(f"+{x}+{y}")
-        
+
     def setup_theme(self): """Apply Alsania theme to ttk widgets"""
         style = ttk.Style()
         style.theme_use('clam')
-        
+
         # Configure styles
         style.configure('Alsania.TFrame', background=COLORS['bg_dark'
-          ])
-        style.configure('Alsania.TLabel', 
-                       background=COLORS['bg_dark'
-          ],
-                       foreground=COLORS['neon_green'
-          ],
-                       font=('Consolas',
-          11))
+      ])
+        style.configure('Alsania.TLabel',
+                        background=COLORS['bg_dark'
+      ],
+                        foreground=COLORS['neon_green'
+      ],
+                        font=('Consolas',
+      11))
         style.configure('Alsania.TButton',
-                       background=COLORS['bg_light'
-          ],
-                       foreground=COLORS['electric_cyan'
-          ],
-                       font=('Consolas',
-          10, 'bold'))
-        
+                        background=COLORS['bg_light'
+      ],
+                        foreground=COLORS['electric_cyan'
+      ],
+                        font=('Consolas',
+      10, 'bold'))
+
     def create_widgets(self): """Create and layout GUI widgets"""
         # Main frame
         main_frame = ttk.Frame(self.root, style='Alsania.TFrame', padding="20")
         main_frame.pack(fill=tk.BOTH, expand=True)
-        
+
         # Title
-        title_label = ttk.Label(main_frame, 
-                               text="🔮 {{appName}}", 
-                               style='Alsania.TLabel',
-                               font=('Consolas',
-          16, 'bold'))
+        title_label = ttk.Label(main_frame,
+                                text="🔮 {{appName}}",
+                                style='Alsania.TLabel',
+                                font=('Consolas',
+      16, 'bold'))
         title_label.pack(pady=(0,
-          20))
-        
+      20))
+
         # Content area
         content_frame = ttk.Frame(main_frame, style='Alsania.TFrame')
         content_frame.pack(fill=tk.BOTH, expand=True)
-        
+
 {
-            {mainLogic
-            }
-          }
-        
+        {mainLogic
+        }
+      }
+
         # Status bar
         self.status_var = tk.StringVar()
         self.status_var.set("🌟 Ready - Alsania Powered")
         status_label = ttk.Label(main_frame,
-                                textvariable=self.status_var,
-                                style='Alsania.TLabel')
+                                 textvariable=self.status_var,
+                                 style='Alsania.TLabel')
         status_label.pack(side=tk.BOTTOM, fill=tk.X, pady=(10,
-          0))
-        
+      0))
+
     def show_about(self): """Show about dialog"""
         messagebox.showinfo("About",
-          "{{appName}}\n\n{{alsaniaSignature}}");
+      "{{appName}}\n\n{{alsaniaSignature}}")
 
 def main(): """Main application entry point"""
     root = tk.Tk()
     app = {
-            {appName
-            }
-          }App(root)
+        {appName
+        }
+      }App(root)
     root.mainloop()
 
 if __name__ == "__main__":
@@ -797,13 +856,13 @@ if __name__ == "__main__":
   private getPythonFileProcessingTemplate(): string {
     return `#!/usr/bin/env python3
 """{{description
-        }
-      }
+    }
+  }
 Robust File Processing Script
 {
-        {alsaniaSignature
-        }
-      }
+    {alsaniaSignature
+    }
+  }
 """
 
 import os
@@ -812,38 +871,38 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 {
-        {#if imports
-        }
-      }
+    {#if imports
+    }
+  }
 {
-        {pythonImports imports
-        }
-      }
+    {pythonImports imports
+    }
+  }
 {
-        {/if
-        }
-      }
+    {/if
+    }
+  }
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='🔮 %(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='🔮 %(asctime)s - %(name)s - %(levelname)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
 class FileProcessor: """Alsania-powered file processing engine"""
-    
+
     def __init__(self, input_path: str, output_path: Optional[str
-      ] = None):
+  ] = None):
         self.input_path = Path(input_path)
         self.output_path = Path(output_path) if output_path else None
         self.processed_count = 0
         self.error_count = 0
-        
+
     def process_files(self) -> bool: """Process files based on requirements"""
         try:
             logger.info(f"🚀 Starting file processing: {self.input_path}")
-            
+
             if self.input_path.is_file():
                 return self._process_single_file(self.input_path)
             elif self.input_path.is_dir():
@@ -851,71 +910,71 @@ class FileProcessor: """Alsania-powered file processing engine"""
             else:
                 logger.error(f"❌ Invalid input path: {self.input_path}")
                 return False
-                
+
         except Exception as e:
             logger.error(f"💥 Processing failed: {e}")
             return False
-    
+
     def _process_single_file(self, file_path: Path) -> bool: """Process a single file"""
         try:
             logger.info(f"📄 Processing file: {file_path}")
-            
+
 {
-        {mainLogic
-        }
-      }
-            
+    {mainLogic
+    }
+  }
+
             self.processed_count += 1
             logger.info(f"✅ File processed successfully: {file_path}")
             return True
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to process {file_path}: {e}")
             self.error_count += 1
             return False
-    
+
     def _process_directory(self, dir_path: Path) -> bool: """Process all files in directory"""
         try:
             logger.info(f"📁 Processing directory: {dir_path}")
             success = True
-            
+
             for file_path in dir_path.rglob("*"):
                 if file_path.is_file():
                     if not self._process_single_file(file_path):
                         success = False
-            
+
             return success
-            
+
         except Exception as e:
             logger.error(f"💥 Directory processing failed: {e}")
             return False
-    
+
     def get_stats(self) -> dict: """Get processing statistics"""
         return {
             'processed': self.processed_count,
             'errors': self.error_count,
-            'success_rate': (self.processed_count / (self.processed_count + self.error_count)) * 100 
+            'success_rate': (self.processed_count / (self.processed_count + self.error_count)) * 100
                            if (self.processed_count + self.error_count) > 0 else 0
-      }
+  }
 
 def main(): """Main execution function"""
     if len(sys.argv) < 2:
         logger.error("Usage: python script.py <input_path> [output_path]")
         sys.exit(1)
-    
+
     input_path = sys.argv[
-        1
-      ]
+    1
+  ]
     output_path = sys.argv[
-        2
-      ] if len(sys.argv) > 2 else None
-    
+    2
+  ] if len(sys.argv) > 2 else None
+
     processor = FileProcessor(input_path, output_path)
     success = processor.process_files()
-    
+
     stats = processor.get_stats()
     logger.info(f"🏁 Processing complete - {stats}")
-    
+
     sys.exit(0 if success else 1)
 
 if __name__ == "__main__":
@@ -923,110 +982,55 @@ if __name__ == "__main__":
   }
 
   private getBashBasicTemplate(): string {
-    return `#!/usr/bin/env bash
+    const template = `#!/usr/bin/env bash
 #
 # {
-        {description
-        }
-      }
-# Generated by Universal Script Generator
+    {description
+    }
+  }
+# Generated by ScripGen
 # {
-        {alsaniaSignature
-        }
-      }
+    {alsaniaSignature
+    }
+  }
 #
 
-set -e  # Exit on any error
-set -u  # Exit on undefined variables
-set -o pipefail  # Exit on pipe failures
+set -e
 
 {
-        {neonColors
-        }
-      }
+    {mainLogic
+    }
+  }
 
-# Logging functions with Alsania styling
-log_info() {
-    echo -e "\${GREEN}🔮 [INFO]\${NC} \$1"
-      }
-
-log_warn() {
-    echo -e "\${YELLOW}⚠️  [WARN]\${NC} \$1"
-      }
-
-log_error() {
-    echo -e "\${RED}💥 [ERROR]\${NC} \$1" >&2
-      }
-
-log_success() {
-    echo -e "\${CYAN}✨ [SUCCESS]\${NC} \$1"
-      }
-
-{
-        {#if commands
-        }
-      }
-{
-        {bashDependencies commands
-        }
-      }
-{
-        {/if
-        }
-      }
-
-cleanup() {
-    log_info "🧹 Cleaning up..."
-    # Add cleanup logic here
-      }
-
-# Set up signal handlers
-trap cleanup EXIT
-trap 'log_error "Script interrupted"; exit 1' INT TERM
-
-main() {
-    log_info "🚀 Starting script execution..."{
-          {#if commands
-          }
-        }
-    check_dependencies
-{
-          {/if
-          }
-        }
-
-{
-          {mainLogic
-          }
-        }
-
-    log_success "Script completed successfully!"
-      }
-
-# Execute main function with all arguments
-main "\$@"`;
+echo 'Script completed'`;
+    this.logger.debug(
+      "getBashBasicTemplate returning template with length:",
+      template.length,
+    );
+    return template;
   }
 
   private getBashNemoTemplate(): string {
     return `#!/usr/bin/env bash
 #
 # {
-        {description
-        }
-      }
+    {description
+    }
+  }
 # Nemo File Manager Action Script
 # {
-        {alsaniaSignature
-        }
-      }
+    {alsaniaSignature
+    }
+  }
 #
 
 set -e
 
 {
-        {neonColors
-        }
-      }
+    {
+neonColors
+    }
+  }
 
 # Check if zenity is available for GUI dialogs
 HAS_ZENITY=false
@@ -1041,7 +1045,7 @@ show_message() {
     else
         echo -e "\${GREEN}🔮 [{{actionName}}]\${NC} \$message"
     fi
-      }
+  }
 
 show_error() {
     local message="\$1"
@@ -1050,7 +1054,7 @@ show_error() {
     else
         echo -e "\${RED}💥 [ERROR]\${NC} \$message" >&2
     fi
-      }
+  }
 
 show_progress() {
     local message="\$1"
@@ -1060,34 +1064,34 @@ show_progress() {
     else
         echo -e "\${CYAN}⚡ [PROCESSING]\${NC} \$message"
     fi
-      }
+  }
 
 stop_progress() {
     if [
-          [ -n "\${PROGRESS_PID:-}"
-          ]
-        ]; then
+      [ -n "\${PROGRESS_PID:-}"
+      ]
+    ]; then
         kill \$PROGRESS_PID 2>/dev/null || true
     fi
-      }
+  }
 
 process_files() {
     local file_count=\$#
     show_message "Processing \$file_count selected file(s)..."
-    
+
     local processed=0
     local failed=0
-    
+
     for file in "\$@"; do
         if [
-          [ -f "\$file"
-          ]
-        ] || [
-          [ -d "\$file"
-          ]
-        ]; then
+      [ -f "\$file"
+      ]
+    ] || [
+      [ -d "\$file"
+      ]
+    ]; then
             echo -e "\${CYAN}📄 Processing:\${NC} \$file"
-            
+
             if process_single_file "\$file"; then
                 ((processed++))
             else
@@ -1098,36 +1102,36 @@ process_files() {
             ((failed++))
         fi
     done
-    
+
     show_message "✅ Processing complete!\\n\\n📊 Results:\\n• Processed: \$processed\\n• Failed: \$failed"
-      }
+  }
 
 process_single_file() {
     local file="\$1"
-    
+
     # Your file processing logic here
 {
-          {fileLogic
-          }
-        }
-    
-    return 0
+      {fileLogic
       }
+    }
+
+    return 0
+  }
 
 main() {
     # Check if files were selected
     if [ \$# -eq 0
-        ]; then
+    ]; then
         show_error "No files selected.\\n\\nPlease select files in Nemo and try again."
         exit 1
     fi
-    
+
     # Trap cleanup
     trap stop_progress EXIT
-    
+
     # Process the files
     process_files "\$@"
-      }
+  }
 
 # Run main function with all arguments
 main "\$@"`;
@@ -1137,22 +1141,23 @@ main "\$@"`;
     return `#!/usr/bin/env bash
 #
 # {
-        {description
-        }
-      }
+    {description
+    }
+  }
 # KDE Connect Command Transformer
 # {
-        {alsaniaSignature
-        }
-      }
+    {alsaniaSignature
+    }
+  }
 #
 
 set -e
 
 {
-        {neonColors
-        }
-      }
+    {
+neonColors
+    }
+  }
 
 # Configuration
 ORIGINAL_COMMAND="{{originalCommand}}"
@@ -1162,33 +1167,33 @@ LOG_FILE="/tmp/kde_command_\$(date +%s).log"
 log_info() {
     echo -e "\${GREEN}🔮 [KDE]\${NC} \$1"
     echo "[INFO] \$(date): \$1" >> "\$LOG_FILE"
-      }
+  }
 
 log_error() {
     echo -e "\${RED}💥 [ERROR]\${NC} \$1" >&2
     echo "[ERROR] \$(date): \$1" >> "\$LOG_FILE"
-      }
+  }
 
 send_notification() {
     local title="\$1"
     local message="\$2"
     local urgency="\${3:-normal}"
-    
+
     # Send local notification
     if command -v notify-send &> /dev/null; then
         notify-send -u "\$urgency" "🔮 \$title" "\$message"
     fi
-    
+
     # Send to KDE Connect device (if available)
     if command -v kdeconnect-cli &> /dev/null; then
         kdeconnect-cli --ping-msg "🔮 \$title: \$message"2>/dev/null || true
     fi
-      }
+  }
 
 execute_transformed_command() {
     log_info "🚀 Executing transformed command..."
     log_info "📱 Original: \$ORIGINAL_COMMAND"
-    
+
     # Execute the transformed command
     if eval "\$TRANSFORMED_COMMAND"; then
         send_notification "Command Success""✅ Command executed successfully!""low"
@@ -1200,32 +1205,32 @@ execute_transformed_command() {
         log_error "❌ Command failed with exit code \$exit_code"
         return \$exit_code
     fi
-      }
+  }
 
 setup_transformed_command() {
     # Transform the original command for remote execution
     TRANSFORMED_COMMAND="{{transformedLogic}}"
-    
+
     log_info "🔄 Command transformed for remote execution"
     log_info "📱 Transformed: \$TRANSFORMED_COMMAND"
-      }
+  }
 
 main() {
     log_info "🌟 KDE Connect Command Transformer Started"
-    
+
     # Setup the transformed command
     setup_transformed_command
-    
+
     # Execute the command
     execute_transformed_command
-    
+
     log_info "🏁 Execution complete - log saved to \$LOG_FILE"
-      }
+  }
 
 # Handle cleanup
 cleanup() {
     log_info "🧹 Cleaning up..."
-      }
+  }
 
 trap cleanup EXIT
 
