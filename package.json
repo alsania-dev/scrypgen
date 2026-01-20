@@ -47,7 +47,7 @@
   },
   "engines": {
     "node": ">=18.0.0",
-    "python": ">=3.13.2"
+    "python": ">=3.8.0"
   },
   "dependencies": {
     "@genkit-ai/mcp": "^1.21.0",
