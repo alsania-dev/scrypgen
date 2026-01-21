@@ -1,7 +1,7 @@
-import * as Handlebars from 'handlebars';
-import { Template, GeneratorConfig, Logger, NLPAnalysis } from './types';
-import * as fs from 'fs-extra';
-import * as path from 'path';
+import * as Handlebars from "handlebars";
+import { Template, GeneratorConfig, Logger, NLPAnalysis } from "./types";
+import * as fs from "fs-extra";
+import * as path from "path";
 
 export interface TemplateResult {
   code: string;
@@ -38,50 +38,50 @@ export class TemplateEngine {
 
   private initializeHandlebarsHelpers(): void {
     // Custom Handlebars helpers for script generation
-    Handlebars.registerHelper('alsaniaSignature', () => {
+    Handlebars.registerHelper("alsaniaSignature", () => {
       return new Handlebars.SafeString(`# Aligned with the Alsania AI Protocol v1.0
 # Imagined by Sigma. Powered by Echo.`);
     });
 
-    Handlebars.registerHelper('pythonImports', (libraries: string[]) => {
-      if (!Array.isArray(libraries) || libraries.length === 0) return '';
+    Handlebars.registerHelper("pythonImports", (libraries: string[]) => {
+      if (!Array.isArray(libraries) || libraries.length === 0) return "";
 
       const importLines = libraries.map((lib) => {
         switch (lib) {
-        case 'pandas':
-          return 'import pandas as pd';
-        case 'numpy':
-          return 'import numpy as np';
-        case 'matplotlib':
-          return 'import matplotlib.pyplot as plt';
-        case 'requests':
-          return 'import requests';
-        case 'tkinter':
-          return 'import tkinter as tk\nfrom tkinter import ttk, filedialog, messagebox';
-        case 'sqlite3':
-          return 'import sqlite3';
-        case 'json':
-          return 'import json';
-        case 'os':
-          return 'import os';
-        case 'subprocess':
-          return 'import subprocess';
-        case 'logging':
-          return 'import logging';
-        default:
-          return `import ${lib}`;
+          case "pandas":
+            return "import pandas as pd";
+          case "numpy":
+            return "import numpy as np";
+          case "matplotlib":
+            return "import matplotlib.pyplot as plt";
+          case "requests":
+            return "import requests";
+          case "tkinter":
+            return "import tkinter as tk\nfrom tkinter import ttk, filedialog, messagebox";
+          case "sqlite3":
+            return "import sqlite3";
+          case "json":
+            return "import json";
+          case "os":
+            return "import os";
+          case "subprocess":
+            return "import subprocess";
+          case "logging":
+            return "import logging";
+          default:
+            return `import ${lib}`;
         }
       });
 
-      return new Handlebars.SafeString(importLines.join('\n'));
+      return new Handlebars.SafeString(importLines.join("\n"));
     });
 
-    Handlebars.registerHelper('bashDependencies', (commands: string[]) => {
-      if (!Array.isArray(commands) || commands.length === 0) return '';
+    Handlebars.registerHelper("bashDependencies", (commands: string[]) => {
+      if (!Array.isArray(commands) || commands.length === 0) return "";
 
       const checkScript = `# Check dependencies
 check_dependencies() {
-    local deps=(${commands.map((cmd) => `"${cmd}"`).join(' ')})
+    local deps=(${commands.map((cmd) => `"${cmd}"`).join(" ")})
     for dep in "\${deps[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             echo "Error: $dep is required but not installed."
@@ -94,11 +94,11 @@ check_dependencies() {
       return new Handlebars.SafeString(checkScript);
     });
 
-    Handlebars.registerHelper('timestamp', () => {
+    Handlebars.registerHelper("timestamp", () => {
       return new Date().toISOString();
     });
 
-    Handlebars.registerHelper('neonColors', () => {
+    Handlebars.registerHelper("neonColors", () => {
       return new Handlebars.SafeString(`# Alsania Neon Color Scheme
 GREEN=$'\\x1b[
         0;32m'    # Neon Green
@@ -120,29 +120,29 @@ NC=$'\\x1b[
   private loadBuiltinTemplates(): void {
     // Python Templates
     this.registerTemplate({
-      name: 'python_basic',
-      language: 'python',
-      category: 'basic',
-      description: 'Basic Python script with Alsania styling',
+      name: "python_basic",
+      language: "python",
+      category: "basic",
+      description: "Basic Python script with Alsania styling",
       content: this.getPythonBasicTemplate(),
       variables: [
         {
-          name: 'description',
-          type: 'string',
+          name: "description",
+          type: "string",
           required: true,
-          description: 'Script description',
+          description: "Script description",
         },
         {
-          name: 'imports',
-          type: 'array',
+          name: "imports",
+          type: "array",
           required: false,
-          description: 'Required imports',
+          description: "Required imports",
         },
         {
-          name: 'mainLogic',
-          type: 'string',
+          name: "mainLogic",
+          type: "string",
           required: true,
-          description: 'Main script logic',
+          description: "Main script logic",
         },
       ],
       requirements: [],
@@ -150,95 +150,95 @@ NC=$'\\x1b[
     });
 
     this.registerTemplate({
-      name: 'python_gui',
-      language: 'python',
-      category: 'gui',
-      description: 'Python GUI application with Alsania theming',
+      name: "python_gui",
+      language: "python",
+      category: "gui",
+      description: "Python GUI application with Alsania theming",
       content: this.getPythonGUITemplate(),
       variables: [
         {
-          name: 'description',
-          type: 'string',
+          name: "description",
+          type: "string",
           required: true,
-          description: 'Application description',
+          description: "Application description",
         },
         {
-          name: 'appName',
-          type: 'string',
+          name: "appName",
+          type: "string",
           required: true,
-          description: 'Application name',
+          description: "Application name",
         },
         {
-          name: 'features',
-          type: 'array',
+          name: "features",
+          type: "array",
           required: false,
-          description: 'GUI features',
+          description: "GUI features",
         },
       ],
-      requirements: ['tkinter'],
+      requirements: ["tkinter"],
       alsaniaCompliant: true,
     });
 
     this.registerTemplate({
-      name: 'python_file_processing',
-      language: 'python',
-      category: 'file_processing',
-      description: 'Python file processing with robust error handling',
+      name: "python_file_processing",
+      language: "python",
+      category: "file_processing",
+      description: "Python file processing with robust error handling",
       content: this.getPythonFileProcessingTemplate(),
       variables: [
         {
-          name: 'description',
-          type: 'string',
+          name: "description",
+          type: "string",
           required: true,
-          description: 'Processing description',
+          description: "Processing description",
         },
         {
-          name: 'fileTypes',
-          type: 'array',
+          name: "fileTypes",
+          type: "array",
           required: false,
-          description: 'Supported file types',
+          description: "Supported file types",
         },
         {
-          name: 'processingLogic',
-          type: 'string',
+          name: "processingLogic",
+          type: "string",
           required: true,
-          description: 'File processing logic',
+          description: "File processing logic",
         },
       ],
-      requirements: ['os', 'logging'],
+      requirements: ["os", "logging"],
       alsaniaCompliant: true,
     });
 
     // Bash Templates
     const bashBasicContent = this.getBashBasicTemplate();
     this.logger.debug(
-      'Registering bash_basic template with content length:',
+      "Registering bash_basic template with content length:",
       bashBasicContent.length,
     );
     this.registerTemplate({
-      name: 'bash_basic',
-      language: 'bash',
-      category: 'basic',
-      description: 'Basic Bash script with Alsania styling',
+      name: "bash_basic",
+      language: "bash",
+      category: "basic",
+      description: "Basic Bash script with Alsania styling",
       content: bashBasicContent,
       variables: [
         {
-          name: 'description',
-          type: 'string',
+          name: "description",
+          type: "string",
           required: true,
-          description: 'Script description',
+          description: "Script description",
         },
         {
-          name: 'commands',
-          type: 'array',
+          name: "commands",
+          type: "array",
           required: false,
-          description: 'System commands',
+          description: "System commands",
         },
         {
-          name: 'mainLogic',
-          type: 'string',
+          name: "mainLogic",
+          type: "string",
           required: true,
-          description: 'Main script logic',
+          description: "Main script logic",
         },
       ],
       requirements: [],
@@ -246,66 +246,66 @@ NC=$'\\x1b[
     });
 
     this.registerTemplate({
-      name: 'bash_nemo_action',
-      language: 'bash',
-      category: 'nemo_integration',
-      description: 'Nemo file manager action script',
+      name: "bash_nemo_action",
+      language: "bash",
+      category: "nemo_integration",
+      description: "Nemo file manager action script",
       content: this.getBashNemoTemplate(),
       variables: [
         {
-          name: 'description',
-          type: 'string',
+          name: "description",
+          type: "string",
           required: true,
-          description: 'Action description',
+          description: "Action description",
         },
         {
-          name: 'actionName',
-          type: 'string',
+          name: "actionName",
+          type: "string",
           required: true,
-          description: 'Action name',
+          description: "Action name",
         },
         {
-          name: 'fileLogic',
-          type: 'string',
+          name: "fileLogic",
+          type: "string",
           required: true,
-          description: 'File processing logic',
+          description: "File processing logic",
         },
       ],
-      requirements: ['zenity'],
+      requirements: ["zenity"],
       alsaniaCompliant: true,
     });
 
     this.registerTemplate({
-      name: 'bash_kde_connect',
-      language: 'bash',
-      category: 'kde_connect',
-      description: 'KDE Connect command transformation script',
+      name: "bash_kde_connect",
+      language: "bash",
+      category: "kde_connect",
+      description: "KDE Connect command transformation script",
       content: this.getBashKDETemplate(),
       variables: [
         {
-          name: 'description',
-          type: 'string',
+          name: "description",
+          type: "string",
           required: true,
-          description: 'Command description',
+          description: "Command description",
         },
         {
-          name: 'originalCommand',
-          type: 'string',
+          name: "originalCommand",
+          type: "string",
           required: true,
-          description: 'Original terminal command',
+          description: "Original terminal command",
         },
         {
-          name: 'transformedLogic',
-          type: 'string',
+          name: "transformedLogic",
+          type: "string",
           required: true,
-          description: 'Transformed command logic',
+          description: "Transformed command logic",
         },
       ],
-      requirements: ['notify-send'],
+      requirements: ["notify-send"],
       alsaniaCompliant: true,
     });
 
-    this.logger.info('Built-in templates loaded', {
+    this.logger.info("Built-in templates loaded", {
       count: this.templates.size,
       templates: Array.from(this.templates.keys()),
       alsaniaCompliant: Array.from(this.templates.values()).every(
@@ -315,11 +315,11 @@ NC=$'\\x1b[
   }
 
   async processTemplate(
-    language: 'python' | 'bash',
+    language: "python" | "bash",
     nlpAnalysis: NLPAnalysis,
     overrides: Record<string, any>,
   ): Promise<TemplateResult> {
-    this.logger.debug('processTemplate called', {
+    this.logger.debug("processTemplate called", {
       language,
       intent: nlpAnalysis.intent.primary,
     });
@@ -336,10 +336,10 @@ NC=$'\\x1b[
 
       // Compile and render template
       const compiledTemplate = this.getCompiledTemplate(template);
-      this.logger.debug('Rendering template with variables:', variables);
+      this.logger.debug("Rendering template with variables:", variables);
       const code = compiledTemplate(variables);
-      this.logger.debug('Template rendered, code length:', code.length);
-      this.logger.debug('Rendered code preview:', code.substring(0, 200));
+      this.logger.debug("Template rendered, code length:", code.length);
+      this.logger.debug("Rendered code preview:", code.substring(0, 200));
 
       // Extract dependencies
       const dependencies = this.extractDependencies(template, variables);
@@ -350,7 +350,7 @@ NC=$'\\x1b[
         template,
       );
 
-      this.logger.debug('Template processed successfully', {
+      this.logger.debug("Template processed successfully", {
         templateName: template.name,
         language,
         codeLength: code.length,
@@ -365,20 +365,20 @@ NC=$'\\x1b[
         suggestions,
       };
     } catch (error) {
-      this.logger.error('Template processing failed', error);
+      this.logger.error("Template processing failed", error);
       throw new Error(`Template processing failed: ${error}`);
     }
   }
 
   private selectTemplate(
-    language: 'python' | 'bash',
+    language: "python" | "bash",
     nlpAnalysis: NLPAnalysis,
   ): Template {
     const candidates = Array.from(this.templates.values()).filter(
       (t) => t.language === language,
     );
 
-    this.logger.debug('Template selection', {
+    this.logger.debug("Template selection", {
       language,
       intent: nlpAnalysis.intent.primary,
       candidates: candidates.map((c) => c.name),
@@ -386,40 +386,40 @@ NC=$'\\x1b[
 
     // Intent-based template selection
     switch (nlpAnalysis.intent.primary) {
-    case 'gui_application':
-      return (
-        candidates.find((t) => t.category === 'gui') ||
-          candidates.find((t) => t.category === 'basic')!
-      );
+      case "gui_application":
+        return (
+          candidates.find((t) => t.category === "gui") ||
+          candidates.find((t) => t.category === "basic")!
+        );
 
-    case 'nemo_integration':
-      return (
-        candidates.find((t) => t.category === 'nemo_integration') ||
-          candidates.find((t) => t.category === 'basic')!
-      );
+      case "nemo_integration":
+        return (
+          candidates.find((t) => t.category === "nemo_integration") ||
+          candidates.find((t) => t.category === "basic")!
+        );
 
-    case 'kde_connect':
-      return (
-        candidates.find((t) => t.category === 'kde_connect') ||
-          candidates.find((t) => t.category === 'basic')!
-      );
+      case "kde_connect":
+        return (
+          candidates.find((t) => t.category === "kde_connect") ||
+          candidates.find((t) => t.category === "basic")!
+        );
 
-    case 'file_processing':
-      return (
-        candidates.find((t) => t.category === 'file_processing') ||
-          candidates.find((t) => t.category === 'basic')!
-      );
+      case "file_processing":
+        return (
+          candidates.find((t) => t.category === "file_processing") ||
+          candidates.find((t) => t.category === "basic")!
+        );
 
-    case 'web_automation':
-      return (
-        candidates.find((t) => t.category === 'web') ||
-          candidates.find((t) => t.category === 'basic')!
-      );
+      case "web_automation":
+        return (
+          candidates.find((t) => t.category === "web") ||
+          candidates.find((t) => t.category === "basic")!
+        );
 
-    default:
-      const selected = candidates.find((t) => t.category === 'basic')!;
-      this.logger.debug('Selected template', { name: selected.name });
-      return selected;
+      default:
+        const selected = candidates.find((t) => t.category === "basic")!;
+        this.logger.debug("Selected template", { name: selected.name });
+        return selected;
     }
   }
 
@@ -451,35 +451,35 @@ NC=$'\\x1b[
     const actions = nlpAnalysis.intent.actions;
     const requirements = nlpAnalysis.requirements;
 
-    let logic = '';
+    let logic = "";
 
     // File operations
     if (requirements.fileSystemAccess) {
-      if (actions.includes('read')) {
-        logic += '    # File reading logic\n';
-        logic += '    # TODO: Implement file reading based on requirements\n';
+      if (actions.includes("read")) {
+        logic += "    # File reading logic\n";
+        logic += "    # TODO: Implement file reading based on requirements\n";
       }
-      if (actions.includes('write')) {
-        logic += '    # File writing logic\n';
-        logic += '    # TODO: Implement file writing based on requirements\n';
+      if (actions.includes("write")) {
+        logic += "    # File writing logic\n";
+        logic += "    # TODO: Implement file writing based on requirements\n";
       }
     }
     // Network operations
     if (requirements.networkAccess) {
-      logic += '    # Network operations\n';
-      logic += '    # TODO: Implement network requests based on requirements\n';
+      logic += "    # Network operations\n";
+      logic += "    # TODO: Implement network requests based on requirements\n";
     }
     // GUI operations
     if (requirements.guiRequired) {
-      logic += '    # GUI setup and interaction\n';
-      logic += '    # TODO: Implement GUI components based on requirements\n';
+      logic += "    # GUI setup and interaction\n";
+      logic += "    # TODO: Implement GUI components based on requirements\n";
     }
     // Default logic if nothing specific
     if (!logic) {
-      logic = '    # Main functionality\n';
+      logic = "    # Main functionality\n";
       logic += '    echo "Hello, World!"\n';
       logic +=
-        '    # TODO: Implement custom logic based on your requirements\n';
+        "    # TODO: Implement custom logic based on your requirements\n";
     }
 
     return logic;
@@ -491,21 +491,21 @@ NC=$'\\x1b[
     const variables: Record<string, any> = {};
 
     switch (nlpAnalysis.intent.primary) {
-    case 'nemo_integration':
-      variables.actionName = 'Custom Action';
-      variables.fileLogic = '    echo "Processing file: $file"';
-      break;
+      case "nemo_integration":
+        variables.actionName = "Custom Action";
+        variables.fileLogic = '    echo "Processing file: $file"';
+        break;
 
-    case 'kde_connect':
-      variables.originalCommand = 'ls -la';
-      variables.transformedLogic =
+      case "kde_connect":
+        variables.originalCommand = "ls -la";
+        variables.transformedLogic =
           '    ls -la && notify-send "Command executed"';
-      break;
+        break;
 
-    case 'gui_application':
-      variables.appName = 'Generated App';
-      variables.features = ['main_window', 'menu_bar', 'status_bar'];
-      break;
+      case "gui_application":
+        variables.appName = "Generated App";
+        variables.features = ["main_window", "menu_bar", "status_bar"];
+        break;
     }
 
     return variables;
@@ -518,7 +518,7 @@ NC=$'\\x1b[
       }`,
     );
     this.logger.debug(
-      'Template content preview:',
+      "Template content preview:",
       template.content.substring(0, 100),
     );
     try {
@@ -526,9 +526,9 @@ NC=$'\\x1b[
       this.logger.debug(`Successfully compiled template: ${template.name}`);
 
       // Test the compilation with a simple variable
-      const testResult = compiled({ test: 'working' });
+      const testResult = compiled({ test: "working" });
       this.logger.debug(
-        'Test compilation result:',
+        "Test compilation result:",
         testResult.substring(0, 50),
       );
 
@@ -570,32 +570,32 @@ NC=$'\\x1b[
     const suggestions: string[] = [];
 
     // Check for Alsania compliance
-    if (template.alsaniaCompliant && !code.includes('Alsania')) {
-      warnings.push('Template should include Alsania compliance markers');
+    if (template.alsaniaCompliant && !code.includes("Alsania")) {
+      warnings.push("Template should include Alsania compliance markers");
     }
     // Check for basic structure
-    if (template.language === 'python') {
-      if (!code.includes('def main():')) {
-        warnings.push('Consider adding a main() function for better structure');
+    if (template.language === "python") {
+      if (!code.includes("def main():")) {
+        warnings.push("Consider adding a main() function for better structure");
       }
       if (!code.includes('if __name__ == "__main__":')) {
-        warnings.push('Consider adding main guard for better module structure');
+        warnings.push("Consider adding main guard for better module structure");
       }
-    } else if (template.language === 'bash') {
-      if (!code.includes('#!/usr/bin/env bash')) {
-        warnings.push('Consider adding proper shebang line');
+    } else if (template.language === "bash") {
+      if (!code.includes("#!/usr/bin/env bash")) {
+        warnings.push("Consider adding proper shebang line");
       }
-      if (!code.includes('set -e')) {
+      if (!code.includes("set -e")) {
         suggestions.push('Consider adding "set -e" for better error handling');
       }
     }
     // Check for error handling
     if (
-      !code.includes('try:') &&
-      !code.includes('catch') &&
-      template.language === 'python'
+      !code.includes("try:") &&
+      !code.includes("catch") &&
+      template.language === "python"
     ) {
-      suggestions.push('Consider adding error handling with try/except blocks');
+      suggestions.push("Consider adding error handling with try/except blocks");
     }
 
     return { errors, warnings, suggestions };
@@ -611,7 +611,7 @@ NC=$'\\x1b[
         this.templateCache.delete(key);
       }
     }
-    this.logger.debug('Template registered', {
+    this.logger.debug("Template registered", {
       name: template.name,
       language: template.language,
     });
@@ -622,19 +622,19 @@ NC=$'\\x1b[
       const templateFiles = await fs.readdir(directory);
 
       for (const file of templateFiles) {
-        if (file.endsWith('.json')) {
+        if (file.endsWith(".json")) {
           const filePath = path.join(directory, file);
           const templateData = await fs.readJson(filePath);
           this.registerTemplate(templateData);
         }
       }
 
-      this.logger.info('External templates loaded', {
+      this.logger.info("External templates loaded", {
         directory,
         count: templateFiles.length,
       });
     } catch (error) {
-      this.logger.warn('Could not load external templates', {
+      this.logger.warn("Could not load external templates", {
         directory,
         error,
       });
@@ -1004,7 +1004,7 @@ set -e
 
 echo 'Script completed'`;
     this.logger.debug(
-      'getBashBasicTemplate returning template with length:',
+      "getBashBasicTemplate returning template with length:",
       template.length,
     );
     return template;

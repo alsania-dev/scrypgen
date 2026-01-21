@@ -1,7 +1,7 @@
-import { ValidationResult, Logger } from './types';
-import * as fs from 'fs-extra';
-import * as path from 'path';
-import { spawn } from 'child_process';
+import { ValidationResult, Logger } from "./types";
+import * as fs from "fs-extra";
+import * as path from "path";
+import { spawn } from "child_process";
 
 interface HealthCheckResult {
   python: boolean;
@@ -15,7 +15,7 @@ export class ScriptValidator {
   private logger: Logger;
   private tempDir: string;
 
-  constructor(logger: Logger, tempDir: string = '/tmp') {
+  constructor(logger: Logger, tempDir: string = "/tmp") {
     this.logger = logger;
     this.tempDir = tempDir;
   }
@@ -29,31 +29,31 @@ export class ScriptValidator {
       python: false,
       bash: false,
       tempDir: false,
-      message: '',
+      message: "",
     };
 
     // Check Python availability
     try {
-      const pythonCheck = await this.runCommand('python3', ['--version']);
+      const pythonCheck = await this.runCommand("python3", ["--version"]);
       result.python = pythonCheck.exitCode === 0;
     } catch (error) {
-      this.logger.warn('Python check failed', error);
+      this.logger.warn("Python check failed", error);
     }
     // Check Bash availability
     try {
-      const bashCheck = await this.runCommand('bash', ['--version']);
+      const bashCheck = await this.runCommand("bash", ["--version"]);
       result.bash = bashCheck.exitCode === 0;
     } catch (error) {
-      this.logger.warn('Bash check failed', error);
+      this.logger.warn("Bash check failed", error);
     }
     // Check if temp directory is writable
     try {
       const testFile = path.join(this.tempDir, `test_${Date.now()}`);
-      await fs.writeFile(testFile, 'test');
+      await fs.writeFile(testFile, "test");
       await fs.remove(testFile);
       result.tempDir = true;
     } catch (error) {
-      this.logger.warn('Temp directory check failed', error);
+      this.logger.warn("Temp directory check failed", error);
     }
 
     result.message = `Health Check - Python: ${result.python}, Bash: ${
@@ -78,19 +78,19 @@ export class ScriptValidator {
    */
   async validateScript(
     code: string,
-    language: 'python' | 'bash',
+    language: "python" | "bash",
   ): Promise<ValidationResult> {
     // Input validation
-    if (!code || typeof code !== 'string') {
-      throw new Error('Code parameter must be a non-empty string');
+    if (!code || typeof code !== "string") {
+      throw new Error("Code parameter must be a non-empty string");
     }
 
-    if (!language || !['python', 'bash'].includes(language)) {
+    if (!language || !["python", "bash"].includes(language)) {
       throw new Error('Language must be either "python" or "bash"');
     }
 
     try {
-      this.logger.debug('Validating script', {
+      this.logger.debug("Validating script", {
         language,
         codeLength: code.length,
       });
@@ -106,7 +106,7 @@ export class ScriptValidator {
         recommendations,
       };
 
-      this.logger.debug('Validation complete', {
+      this.logger.debug("Validation complete", {
         isValid: result.isValid,
         errorCount: syntaxErrors.length,
         warningCount: securityWarnings.length,
@@ -114,7 +114,7 @@ export class ScriptValidator {
 
       return result;
     } catch (error) {
-      this.logger.error('Validation failed', error);
+      this.logger.error("Validation failed", error);
       return {
         isValid: false,
         syntaxErrors: [`Validation error: ${error}`],
@@ -132,21 +132,21 @@ export class ScriptValidator {
    */
   private async checkSyntax(
     code: string,
-    language: 'python' | 'bash',
+    language: "python" | "bash",
   ): Promise<string[]> {
     const errors: string[] = [];
 
     try {
-      if (language === 'python') {
+      if (language === "python") {
         const tempFile = path.join(
           this.tempDir,
           `script_validation_${Date.now()}.py`,
         );
         await fs.writeFile(tempFile, code);
 
-        const result = await this.runCommand('python3', [
-          '-m',
-          'py_compile',
+        const result = await this.runCommand("python3", [
+          "-m",
+          "py_compile",
           tempFile,
         ]);
 
@@ -155,23 +155,23 @@ export class ScriptValidator {
         }
 
         await fs.remove(tempFile);
-      } else if (language === 'bash') {
+      } else if (language === "bash") {
         const tempFile = path.join(
           this.tempDir,
           `script_validation_${Date.now()}.sh`,
         );
         await fs.writeFile(tempFile, code);
 
-        const result = await this.runCommand('bash', ['-n', tempFile]);
+        const result = await this.runCommand("bash", ["-n", tempFile]);
 
         if (result.exitCode !== 0) {
           const errorLines = result.stderr
-            .split('\n')
+            .split("\n")
             .filter(
               (line) =>
-                line.includes('syntax error') ||
-                line.includes('unexpected token') ||
-                line.includes('command not found'),
+                line.includes("syntax error") ||
+                line.includes("unexpected token") ||
+                line.includes("command not found"),
             );
 
           if (errorLines.length > 0) {
@@ -179,7 +179,7 @@ export class ScriptValidator {
           } else {
             errors.push(
               `Bash syntax error: ${
-                result.stderr.split('\n')[0] || 'Unknown syntax error'
+                result.stderr.split("\n")[0] || "Unknown syntax error"
               }`,
             );
           }
@@ -187,7 +187,7 @@ export class ScriptValidator {
         // await fs.remove(tempFile); // Temporarily disabled for debugging
       }
     } catch (error) {
-      this.logger.warn('Could not perform syntax validation', {
+      this.logger.warn("Could not perform syntax validation", {
         language,
         error,
       });
@@ -204,7 +204,7 @@ export class ScriptValidator {
    */
   private checkSecurityIssues(
     code: string,
-    language: 'python' | 'bash',
+    language: "python" | "bash",
   ): string[] {
     const warnings: string[] = [];
 
@@ -216,12 +216,12 @@ export class ScriptValidator {
     const rmRegex = /\brm\s+-rf\b/gi;
     const sudoRegex = /\bsudo\b/gi;
     const passwordRegex = new RegExp(
-      '\\bpassword\\s*=\\s*[\'"][^\'"]*[\'"]',
-      'gi',
+      "\\bpassword\\s*=\\s*['\"][^'\"]*['\"]",
+      "gi",
     );
     const apiKeyRegex = new RegExp(
-      '\\b(api_key|secret|token)\\s*=\\s*[\'"][^\'"]*[\'"]',
-      'gi',
+      "\\b(api_key|secret|token)\\s*=\\s*['\"][^'\"]*['\"]",
+      "gi",
     );
     const osSystemRegex = /\bos\.system\s*\(/gi;
     const osPopenRegex = /\bos\.popen\s*\(/gi;
@@ -229,43 +229,43 @@ export class ScriptValidator {
     const patterns = [
       {
         regex: evalRegex,
-        msg: 'Security warning: Detected eval usage - can execute arbitrary code',
+        msg: "Security warning: Detected eval usage - can execute arbitrary code",
       },
       {
         regex: execRegex,
-        msg: 'Security warning: Detected exec usage - can execute system commands',
+        msg: "Security warning: Detected exec usage - can execute system commands",
       },
       {
         regex: shellRegex,
-        msg: 'Security warning: Detected shell=True - shell injection risk',
+        msg: "Security warning: Detected shell=True - shell injection risk",
       },
       {
         regex: subprocessRegex,
-        msg: 'Security warning: Detected subprocess with shell usage',
+        msg: "Security warning: Detected subprocess with shell usage",
       },
       {
         regex: rmRegex,
-        msg: 'Security warning: Detected rm -rf usage - dangerous file deletion',
+        msg: "Security warning: Detected rm -rf usage - dangerous file deletion",
       },
       {
         regex: sudoRegex,
-        msg: 'Security warning: Detected sudo usage - elevated privileges',
+        msg: "Security warning: Detected sudo usage - elevated privileges",
       },
       {
         regex: passwordRegex,
-        msg: 'Security warning: Detected password in plaintext',
+        msg: "Security warning: Detected password in plaintext",
       },
       {
         regex: apiKeyRegex,
-        msg: 'Security warning: Detected hardcoded credentials',
+        msg: "Security warning: Detected hardcoded credentials",
       },
       {
         regex: osSystemRegex,
-        msg: 'Security warning: Detected os.system usage - command injection risk',
+        msg: "Security warning: Detected os.system usage - command injection risk",
       },
       {
         regex: osPopenRegex,
-        msg: 'Security warning: Detected os.popen usage - command injection risk',
+        msg: "Security warning: Detected os.popen usage - command injection risk",
       },
     ];
 
@@ -276,41 +276,41 @@ export class ScriptValidator {
       }
     }
     // Language-specific checks
-    if (language === 'python') {
+    if (language === "python") {
       if (/\bpickle\.(loads|load)\s*\(/gi.test(code)) {
         warnings.push(
-          'Security warning: Pickle deserialization can be dangerous - use safe alternatives',
+          "Security warning: Pickle deserialization can be dangerous - use safe alternatives",
         );
       }
 
       if (/\binput\s*\(/gi.test(code) && !/#\s*safe\s+input/gi.test(code)) {
         warnings.push(
-          'Security warning: Raw input() usage - consider validation and sanitization',
+          "Security warning: Raw input() usage - consider validation and sanitization",
         );
       }
 
       if (/\b__import__\s*\(/gi.test(code)) {
         warnings.push(
-          'Security warning: Dynamic import usage - potential security risk',
+          "Security warning: Dynamic import usage - potential security risk",
         );
       }
-    } else if (language === 'bash') {
+    } else if (language === "bash") {
       if (
-        new RegExp('\\$\\([^)]*\\)', 'g').test(code) &&
+        new RegExp("\\$\\([^)]*\\)", "g").test(code) &&
         !/#\s*safe\s+command\s+substitution/gi.test(code)
       ) {
         warnings.push(
-          'Security warning: Command substitution - ensure input validation',
+          "Security warning: Command substitution - ensure input validation",
         );
       }
 
       if (/\b(cat|less|more)\s+\/etc\/(passwd|shadow|sudoers)/gi.test(code)) {
-        warnings.push('Security warning: Accessing sensitive system files');
+        warnings.push("Security warning: Accessing sensitive system files");
       }
 
-      if (new RegExp('\\$\\{[^}]*\\}', 'g').test(code) && /\$\d+/g.test(code)) {
+      if (new RegExp("\\$\\{[^}]*\\}", "g").test(code) && /\$\d+/g.test(code)) {
         warnings.push(
-          'Security warning: Unquoted parameter expansion - word splitting risk',
+          "Security warning: Unquoted parameter expansion - word splitting risk",
         );
       }
     }
@@ -326,71 +326,71 @@ export class ScriptValidator {
    */
   private generateRecommendations(
     code: string,
-    language: 'python' | 'bash',
+    language: "python" | "bash",
   ): string[] {
     const recommendations: string[] = [];
 
     // General recommendations
     if (
-      !code.includes('try:') &&
-      !code.includes('except') &&
-      language === 'python'
+      !code.includes("try:") &&
+      !code.includes("except") &&
+      language === "python"
     ) {
       recommendations.push(
-        'Consider adding error handling with try/except blocks',
+        "Consider adding error handling with try/except blocks",
       );
     }
 
-    if (!code.includes('logging') && !code.includes('print')) {
-      recommendations.push('Consider adding logging for better debugging');
+    if (!code.includes("logging") && !code.includes("print")) {
+      recommendations.push("Consider adding logging for better debugging");
     }
     // Language-specific recommendations
-    if (language === 'python') {
+    if (language === "python") {
       if (!code.includes('if __name__ == "__main__":')) {
         recommendations.push(
-          'Consider adding main guard for better module structure',
+          "Consider adding main guard for better module structure",
         );
       }
 
       if (!code.includes('"""')) {
         recommendations.push(
-          'Consider adding docstrings for better documentation',
+          "Consider adding docstrings for better documentation",
         );
       }
 
-      if (code.includes('import *')) {
+      if (code.includes("import *")) {
         recommendations.push(
-          'Avoid wildcard imports - import specific functions instead',
+          "Avoid wildcard imports - import specific functions instead",
         );
       }
-    } else if (language === 'bash') {
-      if (!code.includes('set -e')) {
+    } else if (language === "bash") {
+      if (!code.includes("set -e")) {
         recommendations.push(
           'Consider adding "set -e" for better error handling',
         );
       }
 
       if (
-        !code.includes('#!/usr/bin/env bash') &&
-        !code.includes('#!/bin/bash')
+        !code.includes("#!/usr/bin/env bash") &&
+        !code.includes("#!/bin/bash")
       ) {
-        recommendations.push('Add proper shebang line for better portability');
+        recommendations.push("Add proper shebang line for better portability");
       }
 
-      if (code.includes('$1') && !code.includes('$#')) {
+      if (code.includes("$1") && !code.includes("$#")) {
         recommendations.push(
-          'Consider checking argument count before using positional parameters',
+          "Consider checking argument count before using positional parameters",
         );
       }
     }
     // Alsania compliance
     if (
-      !code.includes('Alsania') &&
-      !code.includes('Sigma') &&
-      !code.includes('Echo')
+      !code.includes("Alsania") &&
+      !code.includes("Sigma") &&
+      !code.includes("Echo")
     ) {
       recommendations.push(
-        'Consider adding Alsania compliance markers for project alignment',
+        "Consider adding Alsania compliance markers for project alignment",
       );
     }
 
@@ -408,20 +408,20 @@ export class ScriptValidator {
     args: string[],
   ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
-      const process = spawn(command, args, { stdio: 'pipe' });
+      const process = spawn(command, args, { stdio: "pipe" });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      process.stdout?.on('data', (data) => {
+      process.stdout?.on("data", (data) => {
         stdout += data.toString();
       });
 
-      process.stderr?.on('data', (data) => {
+      process.stderr?.on("data", (data) => {
         stderr += data.toString();
       });
 
-      process.on('close', (code) => {
+      process.on("close", (code) => {
         resolve({
           exitCode: code || 0,
           stdout: stdout.trim(),
@@ -429,14 +429,14 @@ export class ScriptValidator {
         });
       });
 
-      process.on('error', (error) => {
+      process.on("error", (error) => {
         reject(error);
       });
 
       // Timeout after 10 seconds
       setTimeout(() => {
-        process.kill('SIGKILL');
-        reject(new Error('Command timeout'));
+        process.kill("SIGKILL");
+        reject(new Error("Command timeout"));
       }, 10000);
     });
   }

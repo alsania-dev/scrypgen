@@ -4,7 +4,7 @@ import {
   Entity,
   ScriptRequirements,
   Logger,
-} from './types';
+} from "./types";
 
 export class EnhancedNLPParser {
   private pythonKeywords: Record<string, string[]> = {};
@@ -19,207 +19,207 @@ export class EnhancedNLPParser {
   private initializeKeywords(): void {
     this.pythonKeywords = {
       file_operations: [
-        'read',
-        'write',
-        'create',
-        'delete',
-        'copy',
-        'move',
-        'rename',
-        'chmod',
+        "read",
+        "write",
+        "create",
+        "delete",
+        "copy",
+        "move",
+        "rename",
+        "chmod",
       ],
       data_processing: [
-        'parse',
-        'filter',
-        'sort',
-        'transform',
-        'analyze',
-        'convert',
-        'merge',
-        'csv',
-        'data',
-        'statistics',
+        "parse",
+        "filter",
+        "sort",
+        "transform",
+        "analyze",
+        "convert",
+        "merge",
+        "csv",
+        "data",
+        "statistics",
       ],
       web_scraping: [
-        'scrape',
-        'crawl',
-        'download',
-        'fetch',
-        'request',
-        'api',
-        'json',
-        'xml',
+        "scrape",
+        "crawl",
+        "download",
+        "fetch",
+        "request",
+        "api",
+        "json",
+        "xml",
       ],
       database: [
-        'query',
-        'insert',
-        'update',
-        'delete',
-        'sql',
-        'sqlite',
-        'postgres',
-        'mysql',
+        "query",
+        "insert",
+        "update",
+        "delete",
+        "sql",
+        "sqlite",
+        "postgres",
+        "mysql",
       ],
       gui_desktop: [
-        'tkinter',
-        'qt',
-        'gtk',
-        'window',
-        'dialog',
-        'button',
-        'menu',
-        'interface',
+        "tkinter",
+        "qt",
+        "gtk",
+        "window",
+        "dialog",
+        "button",
+        "menu",
+        "interface",
       ],
       automation: [
-        'schedule',
-        'cron',
-        'automate',
-        'batch',
-        'monitor',
-        'watch',
-        'trigger',
+        "schedule",
+        "cron",
+        "automate",
+        "batch",
+        "monitor",
+        "watch",
+        "trigger",
       ],
       system: [
-        'subprocess',
-        'process',
-        'command',
-        'execute',
-        'run',
-        'shell',
-        'os',
+        "subprocess",
+        "process",
+        "command",
+        "execute",
+        "run",
+        "shell",
+        "os",
       ],
-      network: ['http', 'https', 'ftp', 'ssh', 'socket', 'requests', 'urllib'],
+      network: ["http", "https", "ftp", "ssh", "socket", "requests", "urllib"],
       math_science: [
-        'calculate',
-        'compute',
-        'numpy',
-        'scipy',
-        'matplotlib',
-        'pandas',
-        'statistics',
+        "calculate",
+        "compute",
+        "numpy",
+        "scipy",
+        "matplotlib",
+        "pandas",
+        "statistics",
       ],
       machine_learning: [
-        'sklearn',
-        'tensorflow',
-        'pytorch',
-        'model',
-        'predict',
-        'train',
-        'classify',
+        "sklearn",
+        "tensorflow",
+        "pytorch",
+        "model",
+        "predict",
+        "train",
+        "classify",
       ],
       image_processing: [
-        'pillow',
-        'opencv',
-        'image',
-        'photo',
-        'resize',
-        'crop',
-        'filter',
+        "pillow",
+        "opencv",
+        "image",
+        "photo",
+        "resize",
+        "crop",
+        "filter",
       ],
       audio_video: [
-        'audio',
-        'video',
-        'ffmpeg',
-        'convert',
-        'encode',
-        'decode',
-        'stream',
+        "audio",
+        "video",
+        "ffmpeg",
+        "convert",
+        "encode",
+        "decode",
+        "stream",
       ],
-      testing: ['unittest', 'pytest', 'test', 'assert', 'mock', 'fixture'],
-      logging: ['log', 'debug', 'error', 'warning', 'info', 'trace'],
+      testing: ["unittest", "pytest", "test", "assert", "mock", "fixture"],
+      logging: ["log", "debug", "error", "warning", "info", "trace"],
     };
 
     this.bashKeywords = {
       file_operations: [
-        'ls',
-        'cp',
-        'mv',
-        'rm',
-        'mkdir',
-        'rmdir',
-        'chmod',
-        'chown',
-        'find',
-        'locate',
+        "ls",
+        "cp",
+        "mv",
+        "rm",
+        "mkdir",
+        "rmdir",
+        "chmod",
+        "chown",
+        "find",
+        "locate",
       ],
       text_processing: [
-        'grep',
-        'sed',
-        'awk',
-        'cut',
-        'sort',
-        'uniq',
-        'wc',
-        'tr',
-        'head',
-        'tail',
+        "grep",
+        "sed",
+        "awk",
+        "cut",
+        "sort",
+        "uniq",
+        "wc",
+        "tr",
+        "head",
+        "tail",
       ],
       system_admin: [
-        'ps',
-        'kill',
-        'killall',
-        'service',
-        'systemctl',
-        'crontab',
-        'at',
-        'nohup',
+        "ps",
+        "kill",
+        "killall",
+        "service",
+        "systemctl",
+        "crontab",
+        "at",
+        "nohup",
       ],
-      network: ['curl', 'wget', 'ping', 'ssh', 'scp', 'rsync', 'netstat', 'ss'],
+      network: ["curl", "wget", "ping", "ssh", "scp", "rsync", "netstat", "ss"],
       archive: [
-        'tar',
-        'zip',
-        'unzip',
-        'gzip',
-        'gunzip',
-        'compress',
-        'uncompress',
+        "tar",
+        "zip",
+        "unzip",
+        "gzip",
+        "gunzip",
+        "compress",
+        "uncompress",
       ],
-      monitoring: ['top', 'htop', 'ps', 'df', 'du', 'free', 'iostat', 'vmstat'],
-      package_management: ['apt', 'yum', 'dnf', 'pacman', 'pip', 'npm', 'snap'],
+      monitoring: ["top", "htop", "ps", "df", "du", "free", "iostat", "vmstat"],
+      package_management: ["apt", "yum", "dnf", "pacman", "pip", "npm", "snap"],
       git_vcs: [
-        'git',
-        'svn',
-        'commit',
-        'push',
-        'pull',
-        'clone',
-        'branch',
-        'merge',
+        "git",
+        "svn",
+        "commit",
+        "push",
+        "pull",
+        "clone",
+        "branch",
+        "merge",
       ],
-      backup: ['backup', 'sync', 'mirror', 'archive', 'restore'],
-      environment: ['export', 'env', 'set', 'unset', 'source', 'alias'],
+      backup: ["backup", "sync", "mirror", "archive", "restore"],
+      environment: ["export", "env", "set", "unset", "source", "alias"],
       conditional: [
-        'if',
-        'then',
-        'else',
-        'elif',
-        'fi',
-        'case',
-        'while',
-        'for',
-        'until',
+        "if",
+        "then",
+        "else",
+        "elif",
+        "fi",
+        "case",
+        "while",
+        "for",
+        "until",
       ],
       nemo_integration: [
-        'nemo',
-        'file manager',
-        'context menu',
-        'right click',
-        'action',
+        "nemo",
+        "file manager",
+        "context menu",
+        "right click",
+        "action",
       ],
       kde_connect: [
-        'kde connect',
-        'phone',
-        'mobile',
-        'remote',
-        'notification',
-        'command',
+        "kde connect",
+        "phone",
+        "mobile",
+        "remote",
+        "notification",
+        "command",
       ],
     };
   }
 
   async analyzeDescription(description: string): Promise<NLPAnalysis> {
     try {
-      this.logger.info('Analyzing natural language description', {
+      this.logger.info("Analyzing natural language description", {
         description,
       });
 
@@ -259,7 +259,7 @@ export class EnhancedNLPParser {
         requirements,
       };
 
-      this.logger.info('NLP analysis completed', {
+      this.logger.info("NLP analysis completed", {
         suggestedLanguage,
         complexity,
         confidence: Math.round(confidence * 100),
@@ -267,7 +267,7 @@ export class EnhancedNLPParser {
 
       return analysis;
     } catch (error) {
-      this.logger.error('Error during NLP analysis', error);
+      this.logger.error("Error during NLP analysis", error);
       throw new Error(`NLP analysis failed: ${error}`);
     }
   }
@@ -277,54 +277,54 @@ export class EnhancedNLPParser {
     const objects = this.extractObjects(text);
 
     // Determine primary intent
-    let primary = 'general_scripting';
+    let primary = "general_scripting";
     if (
-      actions.includes('nemo') ||
-      text.includes('file manager') ||
-      text.includes('context menu')
+      actions.includes("nemo") ||
+      text.includes("file manager") ||
+      text.includes("context menu")
     ) {
-      primary = 'nemo_integration';
+      primary = "nemo_integration";
     } else if (
-      actions.includes('kde') ||
-      text.includes('phone') ||
-      text.includes('remote command')
+      actions.includes("kde") ||
+      text.includes("phone") ||
+      text.includes("remote command")
     ) {
-      primary = 'kde_connect';
+      primary = "kde_connect";
     } else if (
       actions.some((action) =>
-        ['scrape', 'download', 'api', 'http'].includes(action),
+        ["scrape", "download", "api", "http"].includes(action),
       )
     ) {
-      primary = 'web_automation';
+      primary = "web_automation";
     } else if (
-      actions.some((action) => ['backup', 'sync', 'archive'].includes(action))
+      actions.some((action) => ["backup", "sync", "archive"].includes(action))
     ) {
-      primary = 'system_administration';
+      primary = "system_administration";
     } else if (
       actions.some((action) =>
-        ['gui', 'window', 'interface'].includes(action),
+        ["gui", "window", "interface"].includes(action),
       ) ||
-      text.includes('tkinter') ||
-      text.includes('gui')
+      text.includes("tkinter") ||
+      text.includes("gui")
     ) {
-      primary = 'gui_application';
+      primary = "gui_application";
     } else if (
       actions.some((action) =>
-        ['read', 'write', 'process', 'parse'].includes(action),
+        ["read", "write", "process", "parse"].includes(action),
       )
     ) {
-      primary = 'file_processing';
+      primary = "file_processing";
     }
     // Extract secondary intents
     const secondary: string[] = [];
-    if (text.includes('error handling') || text.includes('exception')) {
-      secondary.push('error_handling');
+    if (text.includes("error handling") || text.includes("exception")) {
+      secondary.push("error_handling");
     }
-    if (text.includes('log') || text.includes('debug')) {
-      secondary.push('logging');
+    if (text.includes("log") || text.includes("debug")) {
+      secondary.push("logging");
     }
-    if (text.includes('test') || text.includes('validate')) {
-      secondary.push('testing');
+    if (text.includes("test") || text.includes("validate")) {
+      secondary.push("testing");
     }
 
     return {
@@ -394,26 +394,26 @@ export class EnhancedNLPParser {
 
     // File patterns
     const filePattern = new RegExp(
-      '\\b[\\w*.-]+\\.(txt|csv|json|xml|pdf|doc|xls|py|sh|js|html|css|log)\\b',
-      'g',
+      "\\b[\\w*.-]+\\.(txt|csv|json|xml|pdf|doc|xls|py|sh|js|html|css|log)\\b",
+      "g",
     );
     let match;
 
     while ((match = filePattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        label: 'FILE',
+        label: "FILE",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.9,
       });
     }
     // URL patterns
-    const urlPattern = new RegExp('https?://[^\\s]+', 'g');
+    const urlPattern = new RegExp("https?://[^\\s]+", "g");
     while ((match = urlPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        label: 'URL',
+        label: "URL",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.95,
@@ -425,18 +425,18 @@ export class EnhancedNLPParser {
     while ((match = commandPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        label: 'COMMAND',
+        label: "COMMAND",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.85,
       });
     }
     // Path patterns
-    const pathPattern = new RegExp('(?:/[^\\s]*|~/[^\\s]*|\\./[^\\s]*)', 'g');
+    const pathPattern = new RegExp("(?:/[^\\s]*|~/[^\\s]*|\\./[^\\s]*)", "g");
     while ((match = pathPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        label: 'PATH',
+        label: "PATH",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.8,
@@ -450,39 +450,39 @@ export class EnhancedNLPParser {
     text: string,
     intent: Intent,
     entities: Entity[],
-  ): 'simple' | 'medium' | 'complex' {
+  ): "simple" | "medium" | "complex" {
     let complexityScore = 0;
 
     // Base complexity indicators
-    const simpleIndicators = ['hello', 'basic', 'simple', 'print', 'echo'];
+    const simpleIndicators = ["hello", "basic", "simple", "print", "echo"];
     const mediumIndicators = [
-      'function',
-      'class',
-      'loop',
-      'condition',
-      'if',
-      'for',
-      'while',
+      "function",
+      "class",
+      "loop",
+      "condition",
+      "if",
+      "for",
+      "while",
     ];
     const complexIndicators = [
-      'algorithm',
-      'optimization',
-      'concurrent',
-      'threading',
-      'async',
-      'machine learning',
-      'ai',
-      'neural',
-      'deep learning',
-      'tensorflow',
-      'database',
-      'sql',
-      'api',
-      'microservice',
-      'gui',
-      'interface',
-      'qt',
-      'tkinter',
+      "algorithm",
+      "optimization",
+      "concurrent",
+      "threading",
+      "async",
+      "machine learning",
+      "ai",
+      "neural",
+      "deep learning",
+      "tensorflow",
+      "database",
+      "sql",
+      "api",
+      "microservice",
+      "gui",
+      "interface",
+      "qt",
+      "tkinter",
     ];
 
     // Check for complexity indicators
@@ -505,8 +505,8 @@ export class EnhancedNLPParser {
 
     // Factor in integrations
     if (
-      intent.primary === 'nemo_integration' ||
-      intent.primary === 'kde_connect'
+      intent.primary === "nemo_integration" ||
+      intent.primary === "kde_connect"
     ) {
       complexityScore += 1;
     }
@@ -514,15 +514,15 @@ export class EnhancedNLPParser {
     complexityScore += intent.secondary.length * 0.5;
 
     // Determine final complexity
-    if (complexityScore <= 0) return 'simple';
-    if (complexityScore <= 3) return 'medium';
-    return 'complex';
+    if (complexityScore <= 0) return "simple";
+    if (complexityScore <= 3) return "medium";
+    return "complex";
   }
 
   private determineBestLanguage(
     text: string,
     intent: Intent,
-  ): 'python' | 'bash' {
+  ): "python" | "bash" {
     let pythonScore = 0;
     let bashScore = 0;
 
@@ -530,7 +530,7 @@ export class EnhancedNLPParser {
     Object.entries(this.pythonKeywords).forEach(([category, keywords]) => {
       keywords.forEach((keyword) => {
         if (text.includes(keyword)) {
-          pythonScore += this.getCategoryWeight(category, 'python');
+          pythonScore += this.getCategoryWeight(category, "python");
         }
       });
     });
@@ -538,48 +538,48 @@ export class EnhancedNLPParser {
     Object.entries(this.bashKeywords).forEach(([category, keywords]) => {
       keywords.forEach((keyword) => {
         if (text.includes(keyword)) {
-          bashScore += this.getCategoryWeight(category, 'bash');
+          bashScore += this.getCategoryWeight(category, "bash");
         }
       });
     });
 
     // Intent-based scoring
     switch (intent.primary) {
-    case 'nemo_integration':
-    case 'kde_connect':
-    case 'system_administration':
-      bashScore += 3;
-      break;
-    case 'gui_application':
-    case 'web_automation':
-    case 'data_processing':
-      pythonScore += 3;
-      break;
-    case 'file_processing':
-      // Both are good, slight preference to Python for complex processing
-      if (
-        intent.actions.includes('parse') ||
-          intent.actions.includes('analyze')
-      ) {
-        pythonScore += 1;
-      } else {
-        bashScore += 1;
-      }
-      break;
+      case "nemo_integration":
+      case "kde_connect":
+      case "system_administration":
+        bashScore += 3;
+        break;
+      case "gui_application":
+      case "web_automation":
+      case "data_processing":
+        pythonScore += 3;
+        break;
+      case "file_processing":
+        // Both are good, slight preference to Python for complex processing
+        if (
+          intent.actions.includes("parse") ||
+          intent.actions.includes("analyze")
+        ) {
+          pythonScore += 1;
+        } else {
+          bashScore += 1;
+        }
+        break;
     }
     // File type hints
-    if (text.includes('.py') || text.includes('python')) pythonScore += 2;
-    if (text.includes('.sh') || text.includes('bash') || text.includes('shell'))
+    if (text.includes(".py") || text.includes("python")) pythonScore += 2;
+    if (text.includes(".sh") || text.includes("bash") || text.includes("shell"))
       bashScore += 2;
 
-    this.logger.debug('Language scoring', { pythonScore, bashScore });
+    this.logger.debug("Language scoring", { pythonScore, bashScore });
 
-    return pythonScore >= bashScore ? 'python' : 'bash';
+    return pythonScore >= bashScore ? "python" : "bash";
   }
 
   private getCategoryWeight(
     category: string,
-    language: 'python' | 'bash',
+    language: "python" | "bash",
   ): number {
     const weights: Record<string, Record<string, number>> = {
       python: {
@@ -638,19 +638,19 @@ export class EnhancedNLPParser {
 
     // Extract file patterns
     entities.forEach((entity) => {
-      if (entity.label === 'FILE') {
+      if (entity.label === "FILE") {
         if (
-          text.includes('read') ||
-          text.includes('input') ||
-          text.includes('load') ||
-          text.includes('process')
+          text.includes("read") ||
+          text.includes("input") ||
+          text.includes("load") ||
+          text.includes("process")
         ) {
           requirements.inputFiles.push(entity.text);
         }
         if (
-          text.includes('write') ||
-          text.includes('output') ||
-          text.includes('save')
+          text.includes("write") ||
+          text.includes("output") ||
+          text.includes("save")
         ) {
           requirements.outputFiles.push(entity.text);
         }
@@ -660,51 +660,51 @@ export class EnhancedNLPParser {
     // Detect system access needs
     requirements.networkAccess =
       intent.actions.some((action) =>
-        ['download', 'upload', 'request', 'fetch', 'scrape', 'ping'].includes(
+        ["download", "upload", "request", "fetch", "scrape", "ping"].includes(
           action,
         ),
-      ) || entities.some((entity) => entity.label === 'URL');
+      ) || entities.some((entity) => entity.label === "URL");
 
     requirements.fileSystemAccess =
       intent.actions.some((action) =>
-        ['read', 'write', 'create', 'delete', 'copy', 'move', 'find'].includes(
+        ["read", "write", "create", "delete", "copy", "move", "find"].includes(
           action,
         ),
-      ) || entities.some((entity) => ['FILE', 'PATH'].includes(entity.label));
+      ) || entities.some((entity) => ["FILE", "PATH"].includes(entity.label));
 
     requirements.guiRequired =
-      intent.primary === 'gui_application' ||
+      intent.primary === "gui_application" ||
       intent.actions.some((action) =>
-        ['show', 'display', 'window'].includes(action),
+        ["show", "display", "window"].includes(action),
       );
 
     requirements.webRequired =
-      intent.primary === 'web_automation' || requirements.networkAccess;
+      intent.primary === "web_automation" || requirements.networkAccess;
 
     requirements.databaseRequired =
       intent.actions.some((action) =>
-        ['query', 'insert', 'update', 'delete'].includes(action),
+        ["query", "insert", "update", "delete"].includes(action),
       ) ||
-      text.includes('database') ||
-      text.includes('sql');
+      text.includes("database") ||
+      text.includes("sql");
 
     requirements.errorHandling =
-      intent.secondary.includes('error_handling') ||
-      text.includes('error') ||
-      text.includes('exception') ||
-      text.includes('handle');
+      intent.secondary.includes("error_handling") ||
+      text.includes("error") ||
+      text.includes("exception") ||
+      text.includes("handle");
 
     // Extract potential libraries based on content
     const libraryHints: Record<string, string[]> = {
-      requests: ['api', 'http', 'web', 'download'],
-      pandas: ['csv', 'data', 'analyze', 'dataframe'],
-      numpy: ['math', 'calculate', 'array', 'numeric'],
-      tkinter: ['gui', 'window', 'interface', 'dialog'],
-      sqlite3: ['database', 'sqlite', 'db'],
-      json: ['json', 'api', 'parse'],
-      os: ['file', 'directory', 'path', 'system'],
-      subprocess: ['command', 'execute', 'run', 'process'],
-      logging: ['log', 'debug', 'error', 'warning'],
+      requests: ["api", "http", "web", "download"],
+      pandas: ["csv", "data", "analyze", "dataframe"],
+      numpy: ["math", "calculate", "array", "numeric"],
+      tkinter: ["gui", "window", "interface", "dialog"],
+      sqlite3: ["database", "sqlite", "db"],
+      json: ["json", "api", "parse"],
+      os: ["file", "directory", "path", "system"],
+      subprocess: ["command", "execute", "run", "process"],
+      logging: ["log", "debug", "error", "warning"],
     };
 
     Object.entries(libraryHints).forEach(([library, hints]) => {
@@ -715,7 +715,7 @@ export class EnhancedNLPParser {
 
     // Extract system commands for bash
     entities.forEach((entity) => {
-      if (entity.label === 'COMMAND') {
+      if (entity.label === "COMMAND") {
         requirements.systemCommands.push(entity.text);
       }
     });
@@ -730,7 +730,7 @@ export class EnhancedNLPParser {
     if (intent.actions.length > 0) confidence += 0.2;
     if (intent.objects.length > 0) confidence += 0.1;
     if (entities.length > 0) confidence += 0.1;
-    if (intent.primary !== 'general_scripting') confidence += 0.1;
+    if (intent.primary !== "general_scripting") confidence += 0.1;
 
     // Entity confidence contribution
     const avgEntityConfidence =

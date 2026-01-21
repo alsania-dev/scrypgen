@@ -5,11 +5,11 @@ import {
   GeneratorConfig,
   Logger,
   AlsaniaSignature,
-} from './types';
-import { EnhancedNLPParser } from './nlp-parser';
-import { TemplateEngine } from './template-engine';
-import { ScriptValidator } from './validator';
-import { IntegrationManager } from './integration-manager';
+} from "./types";
+import { EnhancedNLPParser } from "./nlp-parser";
+import { TemplateEngine } from "./template-engine";
+import { ScriptValidator } from "./validator";
+import { IntegrationManager } from "./integration-manager";
 
 export class UniversalScrypGenerator {
   private nlpParser: EnhancedNLPParser;
@@ -28,7 +28,7 @@ export class UniversalScrypGenerator {
     this.validator = new ScriptValidator(logger);
     this.integrationManager = new IntegrationManager(config, logger);
 
-    this.logger.info('ScripGen initialized', {
+    this.logger.info("ScripGen initialized", {
       alsaniaCompliant: config.alsaniaCompliance,
     });
   }
@@ -37,26 +37,26 @@ export class UniversalScrypGenerator {
     request: ScrypGenerationRequest,
   ): Promise<ScrypGenerationResult> {
     try {
-      this.logger.info('Starting script generation', {
-        description: request.description.substring(0, 100) + '...',
-        language: request.language || 'auto',
+      this.logger.info("Starting script generation", {
+        description: request.description.substring(0, 100) + "...",
+        language: request.language || "auto",
       });
 
       // Phase 1: NLP Analysis
       const nlpAnalysis = await this.nlpParser.analyzeDescription(
         request.description,
       );
-      console.log('NLP analysis completed', {
+      console.log("NLP analysis completed", {
         intent: nlpAnalysis.intent?.primary,
         language: nlpAnalysis.suggestedLanguage,
       });
 
       // Phase 2: Language Selection
       const targetLanguage = this.selectLanguage(request, nlpAnalysis);
-      console.log('Language selected', { targetLanguage });
+      console.log("Language selected", { targetLanguage });
 
       // Phase 3: Template Selection and Processing
-      console.log('About to call templateEngine.processTemplate', {
+      console.log("About to call templateEngine.processTemplate", {
         targetLanguage,
         intent: nlpAnalysis.intent.primary,
       });
@@ -75,11 +75,11 @@ export class UniversalScrypGenerator {
       // Phase 5: Integration Processing
       const integrationFiles = request.integrations
         ? await this.integrationManager.generateIntegrationFiles(
-          templateResult.code,
-          targetLanguage,
-          request.integrations,
-          nlpAnalysis,
-        )
+            templateResult.code,
+            targetLanguage,
+            request.integrations,
+            nlpAnalysis,
+          )
         : [];
 
       // Phase 6: Metadata Generation
@@ -108,7 +108,7 @@ export class UniversalScrypGenerator {
         integrationFiles,
       };
 
-      this.logger.info('Script generation completed', {
+      this.logger.info("Script generation completed", {
         success: result.success,
         language: targetLanguage,
         templateUsed: templateResult.templateName,
@@ -118,16 +118,16 @@ export class UniversalScrypGenerator {
 
       return result;
     } catch (error) {
-      this.logger.error('Script generation failed', error);
+      this.logger.error("Script generation failed", error);
 
       return {
         success: false,
-        code: '',
-        language: 'bash',
+        code: "",
+        language: "bash",
         metadata: this.generateErrorMetadata(),
         errors: [`Generation failed: ${error}`],
         warnings: [],
-        suggestions: ['Please check your input description and try again'],
+        suggestions: ["Please check your input description and try again"],
         integrationFiles: [],
       };
     }
@@ -136,17 +136,17 @@ export class UniversalScrypGenerator {
   private selectLanguage(
     request: ScrypGenerationRequest,
     nlpAnalysis: any,
-  ): 'python' | 'bash' {
+  ): "python" | "bash" {
     // Explicit language selection
-    if (request.language && request.language !== 'auto') {
-      this.logger.debug('Using explicitly requested language', {
+    if (request.language && request.language !== "auto") {
+      this.logger.debug("Using explicitly requested language", {
         language: request.language,
       });
       return request.language;
     }
     // NLP-based language selection
     if (nlpAnalysis.suggestedLanguage) {
-      this.logger.debug('Using NLP-suggested language', {
+      this.logger.debug("Using NLP-suggested language", {
         language: nlpAnalysis.suggestedLanguage,
         confidence: nlpAnalysis.confidence,
       });
@@ -154,10 +154,10 @@ export class UniversalScrypGenerator {
     }
     // Fallback to config default
     const defaultLang =
-      this.config.defaultLanguage === 'auto'
-        ? 'bash'
+      this.config.defaultLanguage === "auto"
+        ? "bash"
         : this.config.defaultLanguage;
-    this.logger.debug('Using default language', { language: defaultLang });
+    this.logger.debug("Using default language", { language: defaultLang });
     return defaultLang;
   }
 
@@ -165,13 +165,13 @@ export class UniversalScrypGenerator {
     templateName: string,
     nlpAnalysis: any,
     dependencies: string[],
-    language: 'python' | 'bash',
+    language: "python" | "bash",
   ): ScriptMetadata {
     const alsaniaSignature: AlsaniaSignature = {
       aligned: true,
-      protocol: 'v1.0',
-      buildBy: 'Sigma',
-      poweredBy: 'Echo',
+      protocol: "v1.0",
+      buildBy: "Sigma",
+      poweredBy: "Echo",
       sovereign: true,
     };
 
@@ -193,14 +193,14 @@ export class UniversalScrypGenerator {
   private generateErrorMetadata(): ScriptMetadata {
     const alsaniaSignature: AlsaniaSignature = {
       aligned: true,
-      protocol: 'v1.0',
-      buildBy: 'Sigma',
-      poweredBy: 'Echo',
+      protocol: "v1.0",
+      buildBy: "Sigma",
+      poweredBy: "Echo",
       sovereign: true,
     };
 
     return {
-      templateUsed: 'error',
+      templateUsed: "error",
       generatedAt: new Date().toISOString(),
       requirements: {
         inputFiles: [],
@@ -214,7 +214,7 @@ export class UniversalScrypGenerator {
         databaseRequired: false,
         errorHandling: false,
       },
-      estimatedComplexity: 'simple',
+      estimatedComplexity: "simple",
       dependencies: [],
       permissions: [],
       platform: [],
@@ -226,19 +226,19 @@ export class UniversalScrypGenerator {
     const permissions: string[] = [];
 
     if (requirements.fileSystemAccess) {
-      permissions.push('file_system_read_write');
+      permissions.push("file_system_read_write");
     }
 
     if (requirements.networkAccess) {
-      permissions.push('network_access');
+      permissions.push("network_access");
     }
 
     if (requirements.systemCommands?.length > 0) {
-      permissions.push('execute_system_commands');
+      permissions.push("execute_system_commands");
     }
 
     if (requirements.guiRequired) {
-      permissions.push('gui_display');
+      permissions.push("gui_display");
     }
 
     return permissions;
@@ -251,17 +251,17 @@ export class UniversalScrypGenerator {
     const platforms: string[] = [];
 
     // Base platform support
-    if (language === 'python') {
-      platforms.push('linux', 'windows', 'macos');
-    } else if (language === 'bash') {
-      platforms.push('linux', 'macos');
+    if (language === "python") {
+      platforms.push("linux", "windows", "macos");
+    } else if (language === "bash") {
+      platforms.push("linux", "macos");
       // Windows support with WSL
       if (
         !requirements.systemCommands?.some((cmd: string) =>
-          ['systemctl', 'service', 'apt', 'yum'].includes(cmd),
+          ["systemctl", "service", "apt", "yum"].includes(cmd),
         )
       ) {
-        platforms.push('windows-wsl');
+        platforms.push("windows-wsl");
       }
     }
 
@@ -276,9 +276,9 @@ export class UniversalScrypGenerator {
       description: `${
         description
       } - Transform command "${command}" for KDE Connect execution`,
-      language: 'bash',
-      integrations: [{ type: 'kde-connect', enabled: true }],
-      complexity: 'medium',
+      language: "bash",
+      integrations: [{ type: "kde-connect", enabled: true }],
+      complexity: "medium",
     };
 
     return this.generateScript(kdeRequest);
@@ -292,9 +292,9 @@ export class UniversalScrypGenerator {
       description: `${
         description
       } - Create Nemo file manager action "${actionName}"`,
-      language: 'bash',
-      integrations: [{ type: 'nemo', enabled: true }],
-      complexity: 'medium',
+      language: "bash",
+      integrations: [{ type: "nemo", enabled: true }],
+      complexity: "medium",
     };
 
     return this.generateScript(nemoRequest);
@@ -302,7 +302,7 @@ export class UniversalScrypGenerator {
   // Configuration management
   updateConfig(newConfig: Partial<GeneratorConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    this.logger.info('Configuration updated', {
+    this.logger.info("Configuration updated", {
       changes: Object.keys(newConfig),
     });
   }
@@ -312,7 +312,7 @@ export class UniversalScrypGenerator {
   }
   // Health check
   async healthCheck(): Promise<{
-    status: 'healthy' | 'degraded' | 'unhealthy';
+    status: "healthy" | "degraded" | "unhealthy";
     details: any;
   }> {
     try {
@@ -323,20 +323,20 @@ export class UniversalScrypGenerator {
         templateEngineStatus.healthy && validatorStatus.healthy;
 
       return {
-        status: allHealthy ? 'healthy' : 'degraded',
+        status: allHealthy ? "healthy" : "degraded",
         details: {
-          nlpParser: 'healthy',
-          templateEngine: templateEngineStatus.healthy ? 'healthy' : 'degraded',
-          validator: validatorStatus.healthy ? 'healthy' : 'degraded',
-          integrationManager: 'healthy',
+          nlpParser: "healthy",
+          templateEngine: templateEngineStatus.healthy ? "healthy" : "degraded",
+          validator: validatorStatus.healthy ? "healthy" : "degraded",
+          integrationManager: "healthy",
           alsaniaCompliant: this.config.alsaniaCompliance,
-          version: '1.0.0',
+          version: "1.0.0",
         },
       };
     } catch (error) {
-      this.logger.error('Health check failed', error);
+      this.logger.error("Health check failed", error);
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         details: { error },
       };
     }
@@ -345,7 +345,7 @@ export class UniversalScrypGenerator {
   async generateBatchScripts(
     requests: ScrypGenerationRequest[],
   ): Promise<ScrypGenerationResult[]> {
-    this.logger.info('Starting batch script generation', {
+    this.logger.info("Starting batch script generation", {
       count: requests.length,
     });
 
@@ -362,8 +362,8 @@ export class UniversalScrypGenerator {
         this.logger.error(`Batch request ${index + 1} failed`, error);
         results.push({
           success: false,
-          code: '',
-          language: 'bash',
+          code: "",
+          language: "bash",
           metadata: this.generateErrorMetadata(),
           errors: [`Batch generation failed: ${error}`],
           warnings: [],
@@ -373,7 +373,7 @@ export class UniversalScrypGenerator {
       }
     }
 
-    this.logger.info('Batch script generation completed', {
+    this.logger.info("Batch script generation completed", {
       total: requests.length,
       successful: results.filter((r) => r.success).length,
       failed: results.filter((r) => !r.success).length,

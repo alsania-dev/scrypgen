@@ -1,9 +1,9 @@
 export interface ScrypGenerationRequest {
   description: string;
-  language?: 'python' | 'bash' | 'auto';
-  targetPlatform?: 'linux' | 'windows' | 'macos' | 'cross-platform';
+  language?: "python" | "bash" | "auto";
+  targetPlatform?: "linux" | "windows" | "macos" | "cross-platform";
   integrations?: Integration[];
-  complexity?: 'simple' | 'medium' | 'complex';
+  complexity?: "simple" | "medium" | "complex";
   includeTests?: boolean;
   includeDocumentation?: boolean;
   outputPath?: string;
@@ -13,7 +13,7 @@ export interface ScrypGenerationRequest {
 export interface ScrypGenerationResult {
   success: boolean;
   code: string;
-  language: 'python' | 'bash';
+  language: "python" | "bash";
   metadata: ScriptMetadata;
   errors: string[];
   warnings: string[];
@@ -25,7 +25,7 @@ export interface ScriptMetadata {
   templateUsed: string;
   generatedAt: string;
   requirements: ScriptRequirements;
-  estimatedComplexity: 'simple' | 'medium' | 'complex';
+  estimatedComplexity: "simple" | "medium" | "complex";
   dependencies: string[];
   permissions: string[];
   platform: string[];
@@ -34,9 +34,9 @@ export interface ScriptMetadata {
 
 export interface AlsaniaSignature {
   aligned: true;
-  protocol: 'v1.0';
-  buildBy: 'Sigma';
-  poweredBy: 'Echo';
+  protocol: "v1.0";
+  buildBy: "Sigma";
+  poweredBy: "Echo";
   sovereign: true;
 }
 
@@ -54,7 +54,7 @@ export interface ScriptRequirements {
 }
 
 export interface Integration {
-  type: 'nemo' | 'kde-connect' | 'vscode' | 'system';
+  type: "nemo" | "kde-connect" | "vscode" | "system";
   enabled: boolean;
   config?: Record<string, any>;
 }
@@ -70,9 +70,9 @@ export interface IntegrationFile {
 export interface NLPAnalysis {
   intent: Intent;
   entities: Entity[];
-  complexity: 'simple' | 'medium' | 'complex';
+  complexity: "simple" | "medium" | "complex";
   confidence: number;
-  suggestedLanguage: 'python' | 'bash';
+  suggestedLanguage: "python" | "bash";
   requirements: ScriptRequirements;
 }
 
@@ -93,7 +93,7 @@ export interface Entity {
 
 export interface Template {
   name: string;
-  language: 'python' | 'bash';
+  language: "python" | "bash";
   category: string;
   description: string;
   content: string;
@@ -104,14 +104,14 @@ export interface Template {
 
 export interface TemplateVariable {
   name: string;
-  type: 'string' | 'array' | 'boolean' | 'object';
+  type: "string" | "array" | "boolean" | "object";
   required: boolean;
   default?: any;
   description: string;
 }
 
 export interface GeneratorConfig {
-  defaultLanguage: 'python' | 'bash' | 'auto';
+  defaultLanguage: "python" | "bash" | "auto";
   pythonVersion: string;
   bashShell: string;
   outputDirectory: string;
@@ -136,14 +136,14 @@ export interface NemoAction {
   comment: string;
   exec: string;
   iconName: string;
-  selection: 'any' | 'single' | 'multiple' | 'none';
+  selection: "any" | "single" | "multiple" | "none";
   extensions: string[];
   mimeTypes?: string[];
 }
 
 export interface AIProvider {
   name: string;
-  type: 'openai' | 'huggingface' | 'local' | 'ollama';
+  type: "openai" | "huggingface" | "local" | "ollama";
   enabled: boolean;
   config: Record<string, any>;
 }
